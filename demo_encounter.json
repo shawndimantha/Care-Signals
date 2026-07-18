@@ -1,0 +1,45 @@
+{
+  "_disclaimer": "SYNTHETIC DEMO DATA. Patient, clinician, and encounter are fictional. No real PHI. For hackathon/demo purposes only.",
+  "patient": {
+    "name": "Jane Demo-Patient",
+    "age": 54,
+    "sex": "F",
+    "mrn": "SYN-000001",
+    "insurance": {
+      "payer": "Cigna",
+      "plan": "PPO",
+      "deductible_total": 3000.00,
+      "deductible_met": 0.00,
+      "coinsurance_rate_after_deductible": 0.20
+    }
+  },
+  "encounter": {
+    "type": "primary care visit",
+    "date_synthetic": "2026-07-15",
+    "chief_complaint": "low back pain x 3 weeks"
+  },
+  "ambient_transcript": [
+    "CLINICIAN: Hi Jane, good to see you. What's going on today?",
+    "PATIENT: My lower back has been hurting for about three weeks now. It's not from any one thing I can point to.",
+    "CLINICIAN: Any pain going down your legs, numbness, or tingling?",
+    "PATIENT: A little bit of tingling in my right calf sometimes, but no real numbness.",
+    "CLINICIAN: Any fevers, weight loss, or trouble with your bladder or bowels?",
+    "PATIENT: No, none of that.",
+    "CLINICIAN: Okay, that's reassuring. On exam your strength and reflexes look normal, but you do have some tenderness over the lower lumbar area and pain with forward bending.",
+    "PATIENT: It hasn't gotten better with ibuprofen and rest like I expected.",
+    "CLINICIAN: Given it's lasted three weeks and you have that calf tingling, I'd like to get an MRI of your lumbar spine without contrast to take a closer look.",
+    "PATIENT: Okay -- I'm a little worried about what that's going to cost me, my deductible hasn't been touched yet this year.",
+    "CLINICIAN: That's a fair thing to ask about. Let's get you the imaging order and I'll have the team help you compare prices at a few places before you schedule."
+  ],
+  "clinical_note": {
+    "hpi": "54-year-old female presents with 3 weeks of atraumatic low back pain, not clearly related to a specific injury. Reports intermittent tingling in the right calf without frank numbness or weakness. Denies fever, unintentional weight loss, saddle anesthesia, or bowel/bladder dysfunction. Pain has not improved with NSAIDs and relative rest. Patient voiced concern about out-of-pocket cost given her deductible has not been met this plan year.",
+    "exam": "Lumbar spine: tenderness to palpation over lower lumbar paraspinal region. Pain with forward flexion. Strength 5/5 bilateral lower extremities. Reflexes 2+ and symmetric. Negative straight leg raise bilaterally. No saddle anesthesia.",
+    "assessment_and_plan": "Assessment: Subacute low back pain with mild right lower extremity paresthesia, now beyond typical window for conservative-only management without imaging; low concern for cauda equina or other red-flag pathology at this time but symptom duration and unilateral paresthesia warrant lumbar spine imaging.\n\nPlan:\n1. Order MRI lumbar spine without contrast to evaluate for disc pathology / nerve root involvement.\n2. Continue NSAIDs as needed, add short course of physical therapy referral.\n3. Discussed price variation across imaging sites given patient's unmet deductible; will provide a cost comparison before scheduling.\n4. Return to clinic or call sooner if she develops bowel/bladder changes, saddle numbness, or progressive weakness."
+  },
+  "signed_order": {
+    "order_text": "MRI lumbar spine without contrast",
+    "ordering_clinician": "Dr. A. Rivera, MD (synthetic)",
+    "signed_datetime_synthetic": "2026-07-15T10:42:00-07:00",
+    "status": "signed"
+  }
+}

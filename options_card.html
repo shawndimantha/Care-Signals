@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MRI Lumbar Spine (CPT 72148) — San Francisco Price Options</title>
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --good: #0f766e;
+    --bad: #b91c1c;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --accent: #2563eb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 32px 16px 64px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .subtitle { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+  .delta-banner {
+    background: linear-gradient(135deg, #ecfdf5, #eff6ff);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .delta-banner .label { font-size: 14px; color: var(--muted); }
+  .delta-banner .amount { font-size: 28px; font-weight: 700; color: var(--good); }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 16px;
+    position: relative;
+  }
+  .card.best { border-color: var(--good); box-shadow: 0 0 0 1px var(--good); }
+  .rank-badge {
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background: var(--good);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+  }
+  .facility-name { font-weight: 600; font-size: 15px; grid-column: 1 / 2; }
+  .facility-type { font-size: 12px; color: var(--muted); grid-column: 1 / 2; }
+  .oop { font-size: 22px; font-weight: 700; text-align: right; grid-column: 2 / 3; grid-row: 1 / 3; align-self: center; }
+  .oop .oop-label { display: block; font-size: 11px; font-weight: 500; color: var(--muted); text-align: right; }
+  .row2 { grid-column: 1 / 3; display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 13px; flex-wrap: wrap; gap: 8px; }
+  .rate-info { color: var(--ink); }
+  .rate-info .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-right: 6px;
+    background: #eef2ff;
+    color: var(--accent);
+  }
+  .rate-info .badge.cash { background: #fef3c7; color: #92400e; }
+  .rate-info .badge.na { background: #fee2e2; color: var(--bad); }
+  .arithmetic { grid-column: 1 / 3; font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .source-link { font-size: 12px; }
+  .source-link a { color: var(--accent); text-decoration: none; }
+  .source-link a:hover { text-decoration: underline; }
+  .not-published { color: var(--bad); font-weight: 600; }
+  footer { margin-top: 32px; font-size: 11px; color: var(--muted); text-align: center; }
+
+  /* ---------- new: BEAT 0 payer-label line (appended below existing row2, does not alter it) ---------- */
+  .payer-label { grid-column: 1 / 3; font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ---------- new: top disclaimer (unobtrusive) ---------- */
+  .disclaimer {
+    font-size: 11px;
+    color: var(--muted);
+    background: #fff7ed;
+    border: 1px solid #fde8cd;
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin-bottom: 20px;
+    display: inline-block;
+  }
+
+  /* ---------- new: BEAT 1 encounter panel ---------- */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+  }
+  .panel h2 { font-size: 14px; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .transcript { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .turn {
+    max-width: 82%;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+  .turn .speaker { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; opacity: 0.6; display: block; margin-bottom: 2px; }
+  .turn.clinician { align-self: flex-start; background: #eef2ff; color: var(--ink); border-bottom-left-radius: 2px; }
+  .turn.patient { align-self: flex-end; background: #f1f5f9; color: var(--ink); border-bottom-right-radius: 2px; }
+  .turn.cost-worry { background: #fef3c7; border: 1px solid #f5c56b; box-shadow: 0 0 0 1px #f5c56b; }
+  .note-block { margin-bottom: 14px; }
+  .note-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.03em; margin-bottom: 4px; }
+  .note-text { font-size: 13.5px; line-height: 1.5; white-space: pre-line; }
+  .signed-order {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ecfdf5;
+    border: 1px solid #bbf0dd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    margin-top: 6px;
+  }
+  .signed-order .stamp {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--good);
+    background: white;
+    border: 1px solid var(--good);
+    border-radius: 4px;
+    padding: 2px 6px;
+    white-space: nowrap;
+  }
+
+  /* ---------- new: buttons ---------- */
+  .primary-btn {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 11px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .primary-btn:hover { background: #1d4ed8; }
+  .secondary-btn {
+    display: inline-block;
+    background: white;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 18px;
+  }
+  .secondary-btn:hover { background: #eff6ff; }
+  .voice-btn {
+    display: inline-block;
+    background: #e5e7eb;
+    color: #9ca3af;
+    border: 1px solid #d1d5db;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: not-allowed;
+    margin-top: 14px;
+  }
+
+  /* ---------- new: reveal sections ---------- */
+  .reveal { display: none; }
+  .reveal.visible { display: block; animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ---------- new: BEAT 2 mock SMS panel ---------- */
+  .sms-section { margin-top: 24px; }
+  .sms-label { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .phone {
+    width: 300px;
+    margin: 0 auto;
+    background: #111827;
+    border-radius: 28px;
+    padding: 14px 10px 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  }
+  .phone-screen {
+    background: #f2f2f7;
+    border-radius: 18px;
+    padding: 14px 10px;
+    min-height: 220px;
+  }
+  .phone-header {
+    text-align: center;
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .sms-bubble {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: #111827;
+    white-space: pre-line;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    opacity: 0;
+    transform: translateY(8px);
+    animation: bubbleIn 0.4s ease forwards;
+    animation-delay: 0.15s;
+  }
+  @keyframes bubbleIn { to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="disclaimer">Synthetic demo data — fictional patient, no real PHI.</span>
+  <h1>MRI Lumbar Spine, No Contrast — CPT 72148</h1>
+  <p class="subtitle">San Francisco, CA · Patient plan: Cigna PPO · $3,000 deductible ($0 met) · 20% coinsurance after deductible</p>
+
+  <!-- ================= BEAT 1: Encounter panel ================= -->
+  <div class="panel" id="encounter-panel">
+    <h2>Ambient Visit Transcript</h2>
+    <div class="transcript" id="transcript"></div>
+
+    <h2>Clinical Note</h2>
+    <div class="note-block">
+      <div class="note-label">HPI</div>
+      <div class="note-text" id="note-hpi"></div>
+    </div>
+    <div class="note-block">
+      <div class="note-label">Assessment &amp; Plan</div>
+      <div class="note-text" id="note-ap"></div>
+    </div>
+
+    <h2>Signed Order</h2>
+    <div class="signed-order" id="signed-order"></div>
+
+    <button class="primary-btn" id="btn-check-cost" type="button">Check patient cost</button>
+  </div>
+
+  <!-- ================= Options card (unmodified layout) ================= -->
+  <div class="reveal" id="options-section">
+    <div class="delta-banner">
+      <div>
+        <span class="label">Cheapest vs. most expensive option, same code</span>
+      </div>
+      <div class="amount" id="delta-amount">—</div>
+    </div>
+
+    <div id="cards"></div>
+
+    <button class="secondary-btn" id="btn-send-sms" type="button">Send options to patient</button>
+
+    <!-- ================= BEAT 2: mock SMS panel ================= -->
+    <div class="reveal sms-section" id="sms-section">
+      <div class="sms-label">Simulated message — demo only. No SMS API, no real send.</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-header">Messages · Care Team</div>
+          <div class="sms-bubble" id="sms-bubble"></div>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <button class="voice-btn" type="button" disabled>Schedule via voice agent (coming soon)</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Prices sourced from published hospital machine-readable files and MDsave live pricing pages. See <code>data_card.md</code> for full provenance and schema notes. Not medical or financial advice.
+  </footer>
+</div>
+
+<!-- Generated by agent.js (run: node agent.js). Defines `const FACILITIES = [...]` and `const ENCOUNTER = {...}`. -->
+<script src="agent_output.js"></script>
+<script src="encounter_output.js"></script>
+<script>
+// FACILITIES/ENCOUNTER come from agent.js output. If agent.js hasn't been
+// run yet, fail visibly rather than rendering blank/guessed content.
+if (typeof FACILITIES === 'undefined' || typeof ENCOUNTER === 'undefined') {
+  document.write('<p style="color:#b91c1c;font-family:sans-serif;padding:24px;">' +
+    'agent_output.js / encounter_output.js not found. Run <code>node agent.js</code> first, then reload this page.</p>');
+  throw new Error('FACILITIES/ENCOUNTER not loaded -- run node agent.js first');
+}
+
+const fmt = (n) => n == null ? null : n.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+// Cash payers bypass insurance math entirely -- no deductible, no coinsurance,
+// the patient just pays the posted price. Only insurance-billed (negotiated) rows
+// get the deductible + coinsurance breakdown.
+function detailLine(f) {
+  if (f.rate_used == null) return null;
+  if (f.rate_type === 'cash') {
+    return `${fmt(f.rate_used)} — cash price, paid directly`;
+  }
+  const remaining = 3000;
+  const ded = f.deductible_portion;
+  const balance = Math.max(0, f.rate_used - remaining);
+  return `Deductible portion: min(${fmt(f.rate_used)}, ${fmt(remaining)}) = ${fmt(ded)}  ·  `
+       + `Coinsurance portion: ${fmt(balance)} × 20% = ${fmt(f.coinsurance_portion)}  ·  `
+       + `Total OOP: ${fmt(ded)} + ${fmt(f.coinsurance_portion)} = ${fmt(f.oop)}`;
+}
+
+function sortedFacilities() {
+  return [...FACILITIES].sort((a, b) => {
+    const av = a.oop == null ? Infinity : a.oop;
+    const bv = b.oop == null ? Infinity : b.oop;
+    return av - bv;
+  });
+}
+
+function renderOptionsCard() {
+  const sorted = sortedFacilities();
+
+  const withOop = sorted.filter(f => f.oop != null);
+  if (withOop.length >= 2) {
+    const delta = withOop[withOop.length - 1].oop - withOop[0].oop;
+    document.getElementById('delta-amount').textContent = fmt(delta);
+  }
+
+  const container = document.getElementById('cards');
+  container.innerHTML = sorted.map((f, i) => {
+    const isBest = i === 0 && f.oop != null;
+    const rateBadgeClass = f.rate_used == null ? 'na' : (f.rate_type === 'cash' ? 'cash' : '');
+    const rateBadgeText = f.rate_used == null ? 'N/A' : (f.rate_type === 'cash' ? 'Cash' : 'Cigna Negotiated');
+    const rateDisplay = f.rate_used == null
+      ? '<span class="not-published">not published</span>'
+      : fmt(f.rate_used);
+    const oopDisplay = f.oop == null
+      ? '<span class="not-published">not published</span>'
+      : fmt(f.oop);
+    const detail = detailLine(f);
+
+    return `
+      <div class="card ${isBest ? 'best' : ''}">
+        ${isBest ? '<div class="rank-badge">LOWEST OUT-OF-POCKET</div>' : ''}
+        <div class="facility-name">${f.facility}</div>
+        <div class="facility-type">${f.facility_type}</div>
+        <div class="oop">
+          <span class="oop-label">Patient out-of-pocket</span>
+          ${oopDisplay}
+        </div>
+        <div class="row2">
+          <div class="rate-info">
+            <span class="badge ${rateBadgeClass}">${rateBadgeText}</span>
+            Billed rate: ${rateDisplay}
+          </div>
+          <div class="source-link">
+            ${f.source_url ? `<a href="${f.source_url}" target="_blank" rel="noopener">${f.source_label || 'source'} ↗</a>` : '<span class="not-published">no source</span>'}
+          </div>
+        </div>
+        <div class="payer-label">${f.payer_label || ''}</div>
+        ${detail ? `<div class="arithmetic">${detail}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+// ---------------- BEAT 1: encounter panel ----------------
+function speakerClassAndLabel(line) {
+  const isPatient = /^PATIENT:/i.test(line);
+  const speaker = isPatient ? 'Patient' : 'Clinician';
+  const text = line.replace(/^(PATIENT|CLINICIAN):\s*/i, '');
+  return { cls: isPatient ? 'patient' : 'clinician', speaker, text };
+}
+
+function renderTranscript() {
+  const el = document.getElementById('transcript');
+  el.innerHTML = ENCOUNTER.ambient_transcript.map((line) => {
+    const { cls, speaker, text } = speakerClassAndLabel(line);
+    const isCostLine = /worried|worry|cost/i.test(text);
+    return `<div class="turn ${cls} ${isCostLine ? 'cost-worry' : ''}"><span class="speaker">${speaker}</span>${text}</div>`;
+  }).join('');
+}
+
+function clinicianFullName() {
+  return ENCOUNTER.signed_order.ordering_clinician.split(',')[0].trim(); // "Dr. A. Rivera"
+}
+function clinicianLastName() {
+  const parts = clinicianFullName().split(' ');
+  return parts[parts.length - 1];
+}
+function signedDateTimeDisplay() {
+  const m = ENCOUNTER.signed_order.signed_datetime_synthetic.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
+  return m ? `${m[1]} ${m[2]}` : ENCOUNTER.signed_order.signed_datetime_synthetic;
+}
+
+function renderClinicalNote() {
+  document.getElementById('note-hpi').textContent = ENCOUNTER.clinical_note.hpi;
+  document.getElementById('note-ap').textContent = ENCOUNTER.clinical_note.assessment_and_plan;
+}
+
+function renderSignedOrder() {
+  document.getElementById('signed-order').innerHTML =
+    `<span class="stamp">Signed</span>` +
+    `<span>${ENCOUNTER.signed_order.order_text} — signed by ${clinicianFullName()}, ${signedDateTimeDisplay()}</span>`;
+}
+
+// ---------------- BEAT 2: mock SMS, built entirely from agent output ----------------
+function buildSmsText() {
+  const sorted = sortedFacilities().filter(f => f.oop != null);
+  if (sorted.length < 2) {
+    return 'Not enough published prices yet to compare facilities for this patient.';
+  }
+  const cheapest = sorted[0];
+  const priciest = sorted[sorted.length - 1];
+  const delta = fmt(priciest.oop - cheapest.oop);
+  const firstName = ENCOUNTER.patient.name.split(' ')[0];
+
+  return `Hi ${firstName} — Dr. ${clinicianLastName()} ordered an MRI of your lower back. `
+       + `We checked prices for your ${ENCOUNTER.patient.insurance.payer} plan:\n\n`
+       + `${cheapest.facility} — ${fmt(cheapest.oop)}\n`
+       + `${priciest.facility} — ${fmt(priciest.oop)}\n\n`
+       + `Same scan. You'd save ${delta} at ${cheapest.facility}.\n\n`
+       + `Reply SCHEDULE and we'll book it for you.`;
+}
+
+function renderSms() {
+  document.getElementById('sms-bubble').textContent = buildSmsText();
+}
+
+// ---------------- wire up the two clicks ----------------
+document.getElementById('btn-check-cost').addEventListener('click', () => {
+  document.getElementById('options-section').classList.add('visible');
+  document.getElementById('options-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+document.getElementById('btn-send-sms').addEventListener('click', () => {
+  renderSms();
+  const smsSection = document.getElementById('sms-section');
+  smsSection.classList.remove('visible');
+  // restart the bubble animation each time the button is clicked
+  void smsSection.offsetWidth;
+  smsSection.classList.add('visible');
+  smsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+// initial render (encounter panel + options card content; options card stays
+// hidden behind .reveal until "Check patient cost" is clicked)
+renderTranscript();
+renderClinicalNote();
+renderSignedOrder();
+renderOptionsCard();
+</script>
+</body>
+</html>

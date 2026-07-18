@@ -1,0 +1,67 @@
+{
+  "patient_scenario": {
+    "payer": "Cigna",
+    "plan": "PPO",
+    "deductible_total": 3000.00,
+    "deductible_met": 0.00,
+    "deductible_remaining": 3000.00,
+    "coinsurance_rate_after_deductible": 0.20,
+    "cpt": "72148",
+    "note": "Simplified model for demo: deductible + coinsurance math is applied uniformly to whichever rate is used (Cigna-negotiated where it exists, cash price where it doesn't) for an apples-to-apples on-screen comparison. In real claims processing, a true self-pay/cash transaction (no insurance filed) typically bypasses deductible/coinsurance entirely and the patient simply pays the cash price -- flagged here, see RUN_NOTES.md."
+  },
+  "facilities": [
+    {
+      "facility": "UCSF Medical Center (Parnassus)",
+      "facility_type": "academic/large-system hospital",
+      "rate_used_type": "cash (no Cigna-negotiated rate found for 72148 at this facility)",
+      "rate_used": 2704.80,
+      "rate_components": "technical component cash $2,217.60 + professional component cash $487.20 (both real source rows, summed for total patient cost)",
+      "deductible_portion": 2704.80,
+      "coinsurance_portion": 0.00,
+      "patient_out_of_pocket": 2704.80,
+      "arithmetic": "min($2,704.80, $3,000 remaining deductible) = $2,704.80 deductible portion; remaining balance after deductible = $0, so coinsurance portion = $0 x 20% = $0.00; total OOP = $2,704.80 + $0.00 = $2,704.80",
+      "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=ldckxfm5nm9wah74gqi7fdhe6mrtpg5e&file_id=f_1959275070690"
+    },
+    {
+      "facility": "California Pacific Medical Center - Van Ness Campus",
+      "facility_type": "community hospital",
+      "rate_used_type": "Cigna-negotiated (HMO/PPO)",
+      "rate_used": 2849.00,
+      "rate_components": null,
+      "deductible_portion": 2849.00,
+      "coinsurance_portion": 0.00,
+      "patient_out_of_pocket": 2849.00,
+      "arithmetic": "min($2,849.00, $3,000 remaining deductible) = $2,849.00 deductible portion; remaining balance after deductible = $0, so coinsurance portion = $0 x 20% = $0.00; total OOP = $2,849.00 + $0.00 = $2,849.00",
+      "source_url": "https://edge.sitecorecloud.io/sutterhealt962c-sutterhealt8fce-production57cc-4860/media/Project/SutterHealth/SutterHealth/Files/billing-insurance/costs-and-charges/940562680-1740348929_california-pacific-medical-center-van-ness-campus_standardcharges.csv"
+    },
+    {
+      "facility": "Saint Francis Memorial Hospital (Hyde Hospital, UCSF Health)",
+      "facility_type": "hospital-affiliated outpatient imaging",
+      "rate_used_type": "Cigna-negotiated (Commercial | All Other Plans)",
+      "rate_used": 4935.00,
+      "rate_components": null,
+      "deductible_portion": 3000.00,
+      "coinsurance_portion": 387.00,
+      "patient_out_of_pocket": 3387.00,
+      "arithmetic": "min($4,935.00, $3,000 remaining deductible) = $3,000.00 deductible portion; remaining balance after deductible = $4,935.00 - $3,000.00 = $1,935.00; coinsurance portion = $1,935.00 x 20% = $387.00; total OOP = $3,000.00 + $387.00 = $3,387.00",
+      "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=8wogrqzbbev45c7pup8v9298ul2ymlpr&file_id=f_1732346032300"
+    },
+    {
+      "facility": "SimonMed Imaging - San Francisco - Sfmrc",
+      "facility_type": "freestanding imaging center",
+      "rate_used_type": "cash (no Cigna-negotiated rate published for this freestanding facility)",
+      "rate_used": 586.00,
+      "rate_components": null,
+      "deductible_portion": 586.00,
+      "coinsurance_portion": 0.00,
+      "patient_out_of_pocket": 586.00,
+      "arithmetic": "min($586.00, $3,000 remaining deductible) = $586.00 deductible portion; remaining balance after deductible = $0, so coinsurance portion = $0 x 20% = $0.00; total OOP = $586.00 + $0.00 = $586.00",
+      "source_url": "https://www.mdsave.com/p/simonmed-imaging-san-francisco-sfmrc-imaging-and-radiology/mri-without-contrast/d584ffce63dc"
+    }
+  ],
+  "summary": {
+    "lowest_oop": {"facility": "SimonMed Imaging - San Francisco - Sfmrc", "amount": 586.00},
+    "highest_oop": {"facility": "Saint Francis Memorial Hospital (Hyde Hospital, UCSF Health)", "amount": 3387.00},
+    "delta": 2801.00
+  }
+}

@@ -1,0 +1,200 @@
+[
+  {
+    "facility": "UCSF Medical Center (Parnassus)",
+    "facility_type": "academic/large-system hospital",
+    "payer": "cash/self-pay",
+    "plan": null,
+    "rate": 2217.60,
+    "rate_type": "cash",
+    "cpt": "72148",
+    "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=ldckxfm5nm9wah74gqi7fdhe6mrtpg5e&file_id=f_1959275070690",
+    "source_line_or_field": "standard_charge_information item description='Hc Mri, Spine, Lumbar Wo Contr' (CDM 61072148 / RC 610 / HCPCS 72148), modifiers=TC, gross_charge=7392.0, discounted_cash=2217.6"
+  },
+  {
+    "facility": "UCSF Medical Center (Parnassus)",
+    "facility_type": "academic/large-system hospital",
+    "payer": "cash/self-pay (professional component)",
+    "plan": null,
+    "rate": 487.20,
+    "rate_type": "cash",
+    "cpt": "72148",
+    "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=ldckxfm5nm9wah74gqi7fdhe6mrtpg5e&file_id=f_1959275070690",
+    "source_line_or_field": "standard_charge_information item description='Pr Mri, Lumbar Spine' (CDM code 72148), gross_charge=1624.0, discounted_cash=487.2"
+  },
+  {
+    "facility": "UCSF Medical Center (Parnassus)",
+    "facility_type": "academic/large-system hospital",
+    "payer": "Aetna",
+    "plan": null,
+    "rate": null,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=ldckxfm5nm9wah74gqi7fdhe6mrtpg5e&file_id=f_1959275070690",
+    "source_line_or_field": "NOT FOUND: no Aetna commercial payer row exists under HCPCS 72148 in this MRF; only Medicare Managed Care Plan payers listed"
+  },
+  {
+    "facility": "UCSF Medical Center (Parnassus)",
+    "facility_type": "academic/large-system hospital",
+    "payer": "Unitedhealthcare",
+    "plan": "Medicare Managed Care Plan",
+    "rate": 418.84,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=ldckxfm5nm9wah74gqi7fdhe6mrtpg5e&file_id=f_1959275070690",
+    "source_line_or_field": "standard_charge_information item description='Mri lumbar spine w/o dye' (HCPCS 72148), setting=outpatient, payers_information: payer_name='Unitedhealthcare', plan_name='Medicare Managed Care Plan', standard_charge_dollar=418.84, methodology='fee schedule'"
+  },
+  {
+    "facility": "UCSF Medical Center (Parnassus)",
+    "facility_type": "academic/large-system hospital",
+    "payer": "Cigna",
+    "plan": null,
+    "rate": null,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=ldckxfm5nm9wah74gqi7fdhe6mrtpg5e&file_id=f_1959275070690",
+    "source_line_or_field": "NOT FOUND: no Cigna commercial payer row exists under HCPCS 72148 in this MRF; only Medicare Managed Care Plan payers listed (Aspire, Blue Shield, Brown & Toland, Chinese Community Health Plan, Unitedhealthcare)"
+  },
+  {
+    "facility": "UCSF Medical Center (Parnassus)",
+    "facility_type": "academic/large-system hospital",
+    "payer": "Blue Shield",
+    "plan": "Medicare Managed Care Plan",
+    "rate": 436.29,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=ldckxfm5nm9wah74gqi7fdhe6mrtpg5e&file_id=f_1959275070690",
+    "source_line_or_field": "standard_charge_information item description='Mri lumbar spine w/o dye' (HCPCS 72148), setting=outpatient, payers_information: payer_name='Blue Shield', plan_name='Medicare Managed Care Plan', standard_charge_dollar=436.29, methodology='fee schedule'"
+  },
+  {
+    "facility": "California Pacific Medical Center - Van Ness Campus",
+    "facility_type": "community hospital",
+    "payer": "cash/self-pay",
+    "plan": null,
+    "rate": 4851.0,
+    "rate_type": "cash",
+    "cpt": "72148",
+    "source_url": "https://edge.sitecorecloud.io/sutterhealt962c-sutterhealt8fce-production57cc-4860/media/Project/SutterHealth/SutterHealth/Files/billing-insurance/costs-and-charges/940562680-1740348929_california-pacific-medical-center-van-ness-campus_standardcharges.csv",
+    "source_line_or_field": "CSV row 6838: description='MRI SPINE LUMB WO CONTR', code|3=72148 (CPT), billing_class=facility, setting=outpatient, modifiers=TC, standard_charge|gross=4696/4851, standard_charge|discounted_cash=4851"
+  },
+  {
+    "facility": "California Pacific Medical Center - Van Ness Campus",
+    "facility_type": "community hospital",
+    "payer": "Aetna",
+    "plan": "HMO/PPO",
+    "rate": 2864.0,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://edge.sitecorecloud.io/sutterhealt962c-sutterhealt8fce-production57cc-4860/media/Project/SutterHealth/SutterHealth/Files/billing-insurance/costs-and-charges/940562680-1740348929_california-pacific-medical-center-van-ness-campus_standardcharges.csv",
+    "source_line_or_field": "CSV row 25467: code|1=72148 (HCPCS), payer_name='Aetna', plan_name='Hmo/Ppo', standard_charge|negotiated_dollar=2864, methodology=fee schedule"
+  },
+  {
+    "facility": "California Pacific Medical Center - Van Ness Campus",
+    "facility_type": "community hospital",
+    "payer": "United",
+    "plan": "HMO/PPO",
+    "rate": 2828.0,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://edge.sitecorecloud.io/sutterhealt962c-sutterhealt8fce-production57cc-4860/media/Project/SutterHealth/SutterHealth/Files/billing-insurance/costs-and-charges/940562680-1740348929_california-pacific-medical-center-van-ness-campus_standardcharges.csv",
+    "source_line_or_field": "CSV row 25466: code|1=72148 (HCPCS), payer_name='United', plan_name='Hmo / Ppo', standard_charge|negotiated_dollar=2828, methodology=fee schedule"
+  },
+  {
+    "facility": "California Pacific Medical Center - Van Ness Campus",
+    "facility_type": "community hospital",
+    "payer": "Cigna",
+    "plan": "HMO/PPO",
+    "rate": 2849.0,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://edge.sitecorecloud.io/sutterhealt962c-sutterhealt8fce-production57cc-4860/media/Project/SutterHealth/SutterHealth/Files/billing-insurance/costs-and-charges/940562680-1740348929_california-pacific-medical-center-van-ness-campus_standardcharges.csv",
+    "source_line_or_field": "CSV row 25464: code|1=72148 (HCPCS), payer_name='Cigna', plan_name='Hmo/Ppo', standard_charge|negotiated_dollar=2849, methodology=fee schedule"
+  },
+  {
+    "facility": "California Pacific Medical Center - Van Ness Campus",
+    "facility_type": "community hospital",
+    "payer": "Blue Shield",
+    "plan": "HMO/PPO",
+    "rate": 2772.0,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://edge.sitecorecloud.io/sutterhealt962c-sutterhealt8fce-production57cc-4860/media/Project/SutterHealth/SutterHealth/Files/billing-insurance/costs-and-charges/940562680-1740348929_california-pacific-medical-center-van-ness-campus_standardcharges.csv",
+    "source_line_or_field": "CSV row 25462: code|1=72148 (HCPCS), payer_name='Blue Shield', plan_name='Hmo/Ppo', standard_charge|negotiated_dollar=2772, methodology=fee schedule"
+  },
+  {
+    "facility": "Saint Francis Memorial Hospital (Hyde Hospital, UCSF Health)",
+    "facility_type": "hospital-affiliated outpatient imaging",
+    "payer": "cash/self-pay",
+    "plan": null,
+    "rate": 7115.0,
+    "rate_type": "cash",
+    "cpt": "72148",
+    "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=8wogrqzbbev45c7pup8v9298ul2ymlpr&file_id=f_1732346032300",
+    "source_line_or_field": "standard_charge_information item description='MR L SPINE WO CON' (CPT 72148, RC 0612), setting=outpatient, gross_charge=7115, discounted_cash=7115, minimum=260.4, maximum=7494"
+  },
+  {
+    "facility": "Saint Francis Memorial Hospital (Hyde Hospital, UCSF Health)",
+    "facility_type": "hospital-affiliated outpatient imaging",
+    "payer": "Aetna",
+    "plan": "Commercial PPO",
+    "rate": 2138.64,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=8wogrqzbbev45c7pup8v9298ul2ymlpr&file_id=f_1732346032300",
+    "source_line_or_field": "standard_charge_information item description='MR L SPINE WO CON' (CPT 72148), setting=outpatient, payers_information: payer_name='Aetna', plan_name='Commercial | PPO', standard_charge_dollar=2138.64, methodology='fee schedule'"
+  },
+  {
+    "facility": "Saint Francis Memorial Hospital (Hyde Hospital, UCSF Health)",
+    "facility_type": "hospital-affiliated outpatient imaging",
+    "payer": "United",
+    "plan": "Commercial HMO",
+    "rate": 517.79,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=8wogrqzbbev45c7pup8v9298ul2ymlpr&file_id=f_1732346032300",
+    "source_line_or_field": "standard_charge_information item description='MR L SPINE WO CON' (CPT 72148), setting=outpatient, payers_information: payer_name='United', plan_name='Commercial | HMO', standard_charge_dollar=517.79, methodology='fee schedule'"
+  },
+  {
+    "facility": "Saint Francis Memorial Hospital (Hyde Hospital, UCSF Health)",
+    "facility_type": "hospital-affiliated outpatient imaging",
+    "payer": "Cigna",
+    "plan": "Commercial | All Other Plans",
+    "rate": 4935.0,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=8wogrqzbbev45c7pup8v9298ul2ymlpr&file_id=f_1732346032300",
+    "source_line_or_field": "standard_charge_information item description='MR L SPINE WO CON' (CPT 72148), setting=outpatient, payers_information: payer_name='Cigna', plan_name='Commercial | All Other Plans', standard_charge_dollar=4935, methodology='fee schedule'"
+  },
+  {
+    "facility": "Saint Francis Memorial Hospital (Hyde Hospital, UCSF Health)",
+    "facility_type": "hospital-affiliated outpatient imaging",
+    "payer": "BCBS - Anthem",
+    "plan": "Commercial | All Other Plans",
+    "rate": 5168.0,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://app.box.com/index.php?rm=box_download_shared_file&shared_name=8wogrqzbbev45c7pup8v9298ul2ymlpr&file_id=f_1732346032300",
+    "source_line_or_field": "standard_charge_information item description='MR L SPINE WO CON' (CPT 72148), setting=outpatient, payers_information: payer_name='BCBS - Anthem', plan_name='Commercial | All Other Plans', standard_charge_dollar=5168, methodology='fee schedule'"
+  },
+  {
+    "facility": "SimonMed Imaging - San Francisco - Sfmrc (1180 Post St, San Francisco, CA 94109)",
+    "facility_type": "freestanding imaging center",
+    "payer": "cash/self-pay",
+    "plan": null,
+    "rate": 586.00,
+    "rate_type": "cash",
+    "cpt": "72148",
+    "source_url": "https://www.mdsave.com/p/simonmed-imaging-san-francisco-sfmrc-imaging-and-radiology/mri-without-contrast/d584ffce63dc",
+    "source_line_or_field": "MDsave product page, observed 2026-07-18: 'Upfront Cash Price: $586' for 'MRI without Contrast' (procedure description: 'MRI scan without the use of dye for ANY ONE body part Thoracic Spine, Lumbar Spine, Chest, Orbit, Face, Neck, Abdomen, Pelvis, Joints, Brain, Lower/Upper Extremity or TMJ' — Lumbar Spine is an explicitly listed covered body part, matching CPT 72148). SUPERSEDES the prior radiologyassist.com $625 row for this anchor, which was flagged as a stale 2020 price and removed per 2026-07-18 instruction."
+  },
+  {
+    "facility": "SimonMed Imaging - San Francisco - Sfmrc (1180 Post St, San Francisco, CA 94109)",
+    "facility_type": "freestanding imaging center",
+    "payer": "Aetna/UHC/Cigna/BCBS",
+    "plan": null,
+    "rate": null,
+    "rate_type": "negotiated",
+    "cpt": "72148",
+    "source_url": "https://www.mdsave.com/p/simonmed-imaging-san-francisco-sfmrc-imaging-and-radiology/mri-without-contrast/d584ffce63dc",
+    "source_line_or_field": "NOT FOUND: freestanding, non-hospital-owned imaging center is not subject to the CMS hospital price transparency MRF mandate; no MRF located. Only the self-pay cash price (MDsave) is published."
+  }
+]
