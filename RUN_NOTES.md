@@ -1,46 +1,46 @@
-# Run Notes — 2026-07-18, fourth pass (patient context, distance, confirm + calendar artifact)
+# Run Notes — 2026-07-18, fifth pass (real two-way SMS via Twilio + Claude)
 
 ## What changed
 
-**STEP 2 — Patient sidebar.** `demo_encounter.json`'s `patient` object now has a real-shaped `address` (`1450 Sutter St, Apt 4, San Francisco, CA 94109` — a plausible Polk Gulch/Van Ness-corridor address, invented for the demo, not tied to any real person) and a `555` phone number (`(555) 014-2938`, the standard fictional-number prefix). The name is now "Jane Whitfield" instead of the placeholder-looking "Jane Demo-Patient." The clinician's display name dropped the `(synthetic)` suffix (`Dr. A. Rivera, MD`) per instruction — the top-level `_disclaimer` field and the page footer are untouched, so the synthetic-data labeling is still intact elsewhere.
+**`sms-text.js` (new)** — extracted the SMS-text-building logic (`buildOptionsSmsText`, `sortedFacilities`, `fmtCurrency`, `clinicianLastName`) out of `options_card.html`'s inline script into its own file, written so it works both as a plain `<script src>` global in the browser and as a `require()`-able CommonJS module in Node. `options_card.html`'s mock-SMS renderer now calls this shared function instead of its own copy. This is what makes "the real send uses the same text the mock generates" literally true rather than two hand-synced copies — `server.js` and the browser mock both call the identical function.
 
-`options_card.html` gained a new `.patient-sidebar` panel, rendered above the encounter panel (so it's visible before the "Check patient cost" click and before any price data shows): name, age/sex, MRN, address, phone, payer+plan, and `"$0.00 of $3,000.00 met"` — all pulled from `ENCOUNTER`, nothing hardcoded. The page subtitle line (previously a static "$3,000 deductible ($0 met)" string) is now also generated from the same data, and the deductible/coinsurance arithmetic in the cards now reads the deductible total from `ENCOUNTER` instead of a hardcoded `3000` — both were latent hardcodes from earlier passes, fixed while touching this area.
+**`server.js` (new)** — Express server, two endpoints:
+- `POST /send` — loads `agent_output.js` + `encounter_output.js` (same files the browser page already loads), builds the options text via `sms-text.js`, sends it through Twilio to `TO_PHONE_NUMBER`.
+- `POST /webhook` — Twilio inbound-SMS webhook. Validates the Twilio request signature (`twilio.validateRequest`, using `X-Twilio-Signature` + the reconstructed URL; skippable locally via `TWILIO_VALIDATE_SIGNATURE=false`). Builds a system prompt from the patient's plan/deductible and **every** facility's price, distance, source URL, and rate type, calls `claude-sonnet-4-6` (configurable via `ANTHROPIC_MODEL`) with the inbound text as the only user turn, and texts the reply back. The system prompt explicitly instructs: answer only from the supplied facility data, never invent a price or fact, say so and offer a human handoff if the data doesn't cover the question, stay under 300 characters, warm and plain-language, no markdown (it's a text message). Every inbound and outbound message is logged to the terminal with an ISO timestamp via a `logMessage()` helper, so the exchange is visible live during a demo.
+- Also serves the project directory statically (`express.static(__dirname)`), so opening `http://localhost:3000/options_card.html` makes the new live-send button's relative `fetch('/send')` work same-origin.
 
-**STEP 3 — Distance from the patient.** Added `facility_address` and `distance_from_patient` to every row in `prices_72148.json`. Addresses are real, pulled straight from the same source files already cited in each row (`hospital_address` field in the UCSF and Hyde Hospital MRFs, the `hospital_address` column in the CPMC CSV, and the address already embedded in the SimonMed facility name from the MDsave page):
-  - UCSF Medical Center (Parnassus): 505 Parnassus Ave, San Francisco, CA 94143
-  - California Pacific Medical Center – Van Ness: 1101 Van Ness Ave, San Francisco, CA 94109
-  - Saint Francis Memorial Hospital (Hyde Hospital): 900 Hyde St, San Francisco, CA 94109
-  - SimonMed Imaging – San Francisco – Sfmrc: 1180 Post St, San Francisco, CA 94109
+**`options_card.html`** — added a **"Send to patient (live)"** button next to (not replacing) the existing mock "Send options to patient" button, plus a status line. Clicking it POSTs to `/send` and reports the Twilio SID on success or a clear inline error otherwise (e.g. "is server.js running, and is this page loaded from http://localhost, not file://?"). The existing mock SMS button, panel, and all Confirm/`.ics` functionality are untouched.
 
-Distances/times are **hand-estimated from known San Francisco street geography** (Polk Gulch/Van Ness corridor as the reference point) — I did not call a mapping API. Every value is rounded and explicitly suffixed `(approx.)`: SimonMed ~0.4 mi/~3 min, CPMC ~0.3 mi/~3 min, Hyde ~0.6 mi/~4 min, UCSF Parnassus ~3.8 mi/~15 min (across town, near Golden Gate Park). These are directionally correct given the real addresses but should be treated as rough estimates, not turn-by-turn numbers — flagging this so nobody in Q&A mistakes them for a live routing API result.
+**Credentials** — `.env.example` added (Twilio SID/token/from-number, the real verified `TO_PHONE_NUMBER`, `ANTHROPIC_API_KEY`, optional `ANTHROPIC_MODEL`/`PORT`/`TWILIO_VALIDATE_SIGNATURE`). `.gitignore` now excludes `.env`. `package.json` added (`express`, `twilio`, `@anthropic-ai/sdk`, `dotenv`) and `npm install` has been run — `node_modules/` and `package-lock.json` are present locally.
 
-`agent.js` now carries `facility_address`/`distance_from_patient` through from `prices_72148.json` into `agent_output.js` per facility (added to the grouping step and the final result objects — no new pipeline step, just two more fields riding along the existing ones). `options_card.html` renders the distance as a small "📍" line under the facility name/type on each card, sort order unchanged (still ascending by patient OOP), and the recommended (cheapest) facility's distance is included in the mock SMS text.
+**Bug caught and fixed during verification:** the inline script in `options_card.html` originally had its own zero-arg helper also named `sortedFacilities()`. Since classic `<script>` tags share one global scope, that declaration silently overwrote `sms-text.js`'s `sortedFacilities(FACILITIES)` — calling it from inside itself caused infinite recursion, and the whole options card rendered empty. Renamed the local wrapper to `getSortedFacilities()`; verified the bug and the fix both in a real browser before moving on.
 
-**STEP 4 — Confirm + calendar artifact.** After the existing SMS beat, a new **"Confirm SimonMed and schedule"** button:
-  1. Disables itself and turns the SMS bubble into a pending state: *"Calling SimonMed to schedule… (stub — no real call is being placed)"* — labeled explicitly as a stub under the button too ("Stubbed handoff for this demo... Real scheduling call/API is next-build scope."). No telephony of any kind is implemented.
-  2. After ~1.4s, resolves to a confirmation message with a concrete synthetic appointment slot (Wednesday, July 22, 2026, 9:30–10:00 AM, at whichever facility is currently ranked cheapest, with its address and price — all read live from `FACILITIES`, not typed in).
-  3. Shows "Reminder queued for 24 hours before."
-  4. Builds a real `.ics` file client-side (`Blob` + `URL.createObjectURL`, no server) and points a download link at it.
+## What I did NOT do, and why
 
-The appointment date/time itself is a fixed synthetic slot (not derived from any real scheduler) so the `.ics` is reproducible; every other field in it (facility name, address, price, CPT code) comes from the agent's live data.
+I did **not** run the actual end-to-end verification (start the server against real credentials, expose `/webhook` via ngrok, set that URL as the Twilio number's Messaging webhook, and complete a real outbound → reply → agent-response round trip). Three reasons, all independent:
 
-## Verification
+1. **No credentials exist in this environment.** No `TWILIO_ACCOUNT_SID`/`TWILIO_AUTH_TOKEN`/Twilio phone number, no `ANTHROPIC_API_KEY`, and no `ngrok` binary or Twilio CLI installed here.
+2. **Sending real SMS costs real money per message** and hits a real phone.
+3. **Registering the ngrok URL as the Twilio number's webhook overwrites whatever that number's Messaging webhook currently points to** — a live account configuration change to infrastructure outside this repo, on a number that might be used for other things.
 
-Same method as the prior pass — real Chromium via Playwright (`~/Library/Caches/ms-playwright/chromium-1208`), not a stubbed DOM, loaded via an actual `file://` URL:
-- Sidebar renders correctly before any click, with the new address/phone/deductible fields.
-- All 4 cards show a distance line; sort order confirmed still ascending by OOP (SimonMed → UCSF → CPMC → Hyde).
-- SMS text includes the distance suffix on the recommended facility.
-- Clicked "Confirm SimonMed and schedule": confirmed the button disables, the pending stub text appears, then after the delay the confirmation text, reminder line, and `.ics` download link all appear with the right data.
-- Fetched the actual blob URL contents from the page and saved the `.ics` to disk, then **parsed it with the Python `icalendar` library** (installed for this check) — it parsed cleanly: valid `VCALENDAR`/`VEVENT`, correct `DTSTART`/`DTEND` in UTC (16:30–17:00Z = 9:30–10:00 AM PDT), `UID`, `SUMMARY`, `LOCATION`, `DESCRIPTION`, and a working `VALARM` with a `-P1D` trigger. Verified CRLF line endings throughout (RFC 5545 requires CRLF, not bare `\n`) and that comma/semicolon-bearing fields (`LOCATION`, `DESCRIPTION`) round-trip correctly through the escaping.
-- Zero browser console or page errors across the whole run.
-- Full-page screenshot reviewed visually — no layout shift; the pre-existing "Check patient cost" and "Send options to patient" buttons are still exactly where they were, nothing new sits on top of them.
+Those are exactly the kind of side-effecting, cost-incurring, external-account-modifying actions I check in before doing, even when asked to do them as part of a larger task — so I built and verified everything I could offline, and I'm stopping here to ask rather than guessing at your Twilio setup.
 
-## Did not touch
+## What I did verify (safe, no real send)
 
-The `.card`, `.delta-banner`, `.oop`, `.row2`, `.rate-info`, `.arithmetic`, `.transcript`/`.turn`, and `.sms-bubble`/`.phone` CSS and markup are unchanged except for the two additive lines specified (`.facility-distance` under the facility name, and the new confirm/reminder/`.ics` elements appended after the existing SMS bubble/voice button — nothing removed or restyled).
+- `sms-text.js`'s output matches the mock SMS text exactly (unit-tested directly via `node -e`).
+- `server.js` boots and exits cleanly with a clear message when required env vars are missing (`node server.js` → lists the missing var names, exit code 1, no crash trace).
+- With dummy (fake-format) credentials in a throwaway `.env`: the server starts, serves `options_card.html` over HTTP, and `POST /send` fails **gracefully** with Twilio's real "Authentication Error - invalid username" (proves the request shape and error path work; a real SID/token would succeed the same way).
+- Clicked "Send to patient (live)" in a real Playwright-driven Chromium session against the running server: the button correctly POSTs, the fetch fails on the fake Twilio auth (as expected), and the failure renders inline as `"Live send failed... (Authentication Error - invalid username)"` — confirming the full browser → Express → Twilio-client → JSON-error → UI-display chain works.
+- Re-ran the full existing Playwright suite (patient sidebar, distance, confirm/schedule, `.ics` generation) against the updated `options_card.html` — all green, zero console/page errors, after the `sortedFacilities` fix above.
+- Confirmed `.env` is git-ignored and untracked (`git check-ignore -v .env`, `git ls-files | grep .env`) after creating and deleting a real (dummy-valued) `.env` file.
 
-## To check
+## What I need from you to finish this
 
-- The distances are estimates, not from a mapping API — good enough for a demo narrative ("everything's within a few blocks except UCSF") but say so up front if asked how precise they are.
-- The appointment slot (July 22, 2026, 9:30 AM) is fixed/synthetic and does not change if the recommended facility changes on a future data refresh — only the facility name/address/price in the confirmation text and `.ics` update dynamically. If you want the slot itself to vary, that's a follow-up.
-- This pass is **not yet committed to git** (the repo from the last session, `shawndimantha/Care-Signals`, exists but the working tree now has uncommitted changes) — say the word if you want it committed and pushed.
+To actually run the live round trip, I need either the values themselves or your go-ahead to proceed once you've set them:
+
+1. **Twilio**: Account SID, Auth Token, and a Twilio phone number capable of sending/receiving SMS.
+2. **A real phone number you control** to act as the demo "patient" (`TO_PHONE_NUMBER`) — the fictional `(555) 014-2938` in `demo_encounter.json` can't receive real texts.
+3. **An Anthropic API key.**
+4. **ngrok** (not installed here — `brew install ngrok` or `npm install -g ngrok`, plus an ngrok account/authtoken) to expose `POST /webhook` publicly so Twilio can reach it.
+
+Once those exist, the remaining steps are: `cp .env.example .env` and fill it in → `node server.js` → `ngrok http 3000` → copy the `https://*.ngrok-free.app/webhook` URL into the Twilio number's **Messaging → "A message comes in"** webhook (Console or `twilio phone-numbers:update`) → click "Send to patient (live)" or `curl -X POST http://localhost:3000/send` → reply from your phone → watch the terminal log both directions and the reply arrive by SMS. I'll do all of that on your confirmation, since the last three of those steps are exactly the real-money/real-account-change actions described above.

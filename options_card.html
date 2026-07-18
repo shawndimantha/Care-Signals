@@ -4,294 +4,529 @@
 <meta charset="UTF-8">
 <title>MRI Lumbar Spine (CPT 72148) — San Francisco Price Options</title>
 <style>
+  /* =========================================================================
+     Care Signals — visual system
+     Warm cream page, white cards, near-black text, ONE red-orange accent
+     used sparingly. Ambient-clinical-doc visual language. 13px floor.
+     ========================================================================= */
   :root {
-    --ink: #1a1a2e;
-    --muted: #6b7280;
-    --line: #e5e7eb;
-    --good: #0f766e;
-    --bad: #b91c1c;
-    --bg: #f8fafc;
-    --card: #ffffff;
-    --accent: #2563eb;
+    --paper:      #f4efe9;   /* warm off-white page */
+    --card:       #ffffff;   /* pure white surfaces */
+    --ink:        #201d1a;   /* warm near-black */
+    --ink-2:      #453f39;   /* strong body */
+    --muted:      #635c54;   /* secondary text (>=5:1 on white) */
+    --faint:      #7a7168;   /* quietest supporting text (>=4.5:1) */
+    --line:       #ebe4dc;   /* warm hairline (used sparingly) */
+    --line-2:     #ddd4c9;   /* stronger divider */
+
+    /* the single accent — warm red-orange */
+    --accent:     #e5431e;   /* vivid: hero numbers, ring, indicators */
+    --accent-ink: #b0331a;   /* deeper: small text + button fills (contrast) */
+    --accent-deep:#8f2914;   /* hover */
+    --accent-050: #fdefe9;   /* peach tint bg */
+    --accent-100: #f7d7c9;   /* peach tint border */
+
+    --radius:     20px;
+    --radius-md:  16px;
+    --radius-sm:  12px;
+    --shadow-sm:  0 1px 2px rgba(74,50,28,.05);
+    --shadow:     0 1px 3px rgba(74,50,28,.05), 0 10px 30px rgba(74,50,28,.06);
+    --shadow-lift:0 2px 6px rgba(74,50,28,.07), 0 18px 44px rgba(74,50,28,.10);
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--paper);
     color: var(--ink);
-    padding: 32px 16px 64px;
+    padding: 52px 20px 88px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.5;
   }
-  .wrap { max-width: 760px; margin: 0 auto; }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  .subtitle { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
-  .delta-banner {
-    background: linear-gradient(135deg, #ecfdf5, #eff6ff);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .delta-banner .label { font-size: 14px; color: var(--muted); }
-  .delta-banner .amount { font-size: 28px; font-weight: 700; color: var(--good); }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 18px 20px;
-    margin-bottom: 12px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 4px 16px;
-    position: relative;
-  }
-  .card.best { border-color: var(--good); box-shadow: 0 0 0 1px var(--good); }
-  .rank-badge {
-    position: absolute;
-    top: -10px;
-    left: 16px;
-    background: var(--good);
-    color: white;
-    font-size: 11px;
+  .wrap { max-width: 720px; margin: 0 auto; }
+
+  /* ---------- page header ---------- */
+  h1 {
+    font-size: 25px;
     font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 999px;
-    letter-spacing: 0.03em;
+    letter-spacing: -0.022em;
+    margin: 0 0 6px;
+    color: var(--ink);
   }
-  .facility-name { font-weight: 600; font-size: 15px; grid-column: 1 / 2; }
-  .facility-type { font-size: 12px; color: var(--muted); grid-column: 1 / 2; }
-  .oop { font-size: 22px; font-weight: 700; text-align: right; grid-column: 2 / 3; grid-row: 1 / 3; align-self: center; }
-  .oop .oop-label { display: block; font-size: 11px; font-weight: 500; color: var(--muted); text-align: right; }
-  .row2 { grid-column: 1 / 3; display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 13px; flex-wrap: wrap; gap: 8px; }
-  .rate-info { color: var(--ink); }
-  .rate-info .badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    padding: 1px 6px;
-    border-radius: 4px;
-    margin-right: 6px;
-    background: #eef2ff;
-    color: var(--accent);
-  }
-  .rate-info .badge.cash { background: #fef3c7; color: #92400e; }
-  .rate-info .badge.na { background: #fee2e2; color: var(--bad); }
-  .arithmetic { grid-column: 1 / 3; font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
-  .source-link { font-size: 12px; }
-  .source-link a { color: var(--accent); text-decoration: none; }
-  .source-link a:hover { text-decoration: underline; }
-  .not-published { color: var(--bad); font-weight: 600; }
-  footer { margin-top: 32px; font-size: 11px; color: var(--muted); text-align: center; }
+  .subtitle { color: var(--muted); font-size: 15px; margin: 0 0 30px; }
 
-  /* ---------- new: BEAT 0 payer-label line (appended below existing row2, does not alter it) ---------- */
-  .payer-label { grid-column: 1 / 3; font-size: 11px; color: var(--muted); margin-top: 4px; }
-
-  /* ---------- new: distance chip, appended next to facility-name (does not alter existing card grid) ---------- */
-  .facility-distance { font-size: 11px; color: var(--muted); grid-column: 1 / 2; margin-top: 1px; }
-  .facility-distance .pin { margin-right: 3px; }
-
-  /* ---------- new: top disclaimer (unobtrusive) ---------- */
   .disclaimer {
-    font-size: 11px;
-    color: var(--muted);
-    background: #fff7ed;
-    border: 1px solid #fde8cd;
-    border-radius: 8px;
-    padding: 6px 10px;
+    font-size: 13px;
+    color: var(--faint);
+    background: var(--card);
+    border-radius: 999px;
+    padding: 6px 14px;
     margin-bottom: 20px;
     display: inline-block;
+    box-shadow: var(--shadow-sm);
   }
 
-  /* ---------- new: BEAT 1 encounter panel ---------- */
+  /* ---------- shared panel shell (white card, soft shadow, no border) ---------- */
   .panel {
     background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 20px 22px;
-    margin-bottom: 20px;
+    border-radius: var(--radius);
+    padding: 30px 32px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow);
   }
-  .panel h2 { font-size: 14px; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
-  .transcript { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .panel h2 {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+  }
+  .panel h2:not(:first-child) { margin-top: 30px; padding-top: 26px; border-top: 1px solid var(--line); }
+
+  /* =========================================================================
+     STEP 2 — patient sidebar: a quiet context strip
+     ========================================================================= */
+  .patient-sidebar {
+    background: var(--card);
+    border-radius: var(--radius-md);
+    padding: 18px 26px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 44px;
+  }
+  .patient-sidebar .field { font-size: 14px; }
+  .patient-sidebar .field .k {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--faint);
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .patient-sidebar .field .v {
+    color: var(--ink-2);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.25;
+  }
+  .patient-sidebar .field.name .v { font-weight: 700; font-size: 16px; color: var(--ink); letter-spacing: -0.01em; }
+
+  /* =========================================================================
+     STEP 1 — encounter panel: a calm clinical-note surface
+     ========================================================================= */
+  .transcript { display: flex; flex-direction: column; gap: 9px; margin-bottom: 4px; }
   .turn {
     max-width: 82%;
-    padding: 8px 12px;
-    border-radius: 10px;
-    font-size: 13.5px;
-    line-height: 1.4;
+    padding: 11px 15px;
+    border-radius: 16px;
+    font-size: 14.5px;
+    line-height: 1.5;
   }
-  .turn .speaker { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; opacity: 0.6; display: block; margin-bottom: 2px; }
-  .turn.clinician { align-self: flex-start; background: #eef2ff; color: var(--ink); border-bottom-left-radius: 2px; }
-  .turn.patient { align-self: flex-end; background: #f1f5f9; color: var(--ink); border-bottom-right-radius: 2px; }
-  .turn.cost-worry { background: #fef3c7; border: 1px solid #f5c56b; box-shadow: 0 0 0 1px #f5c56b; }
-  .note-block { margin-bottom: 14px; }
-  .note-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.03em; margin-bottom: 4px; }
-  .note-text { font-size: 13.5px; line-height: 1.5; white-space: pre-line; }
+  .turn .speaker {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--faint);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .turn.clinician { align-self: flex-start; background: #f1ebe3; color: var(--ink-2); border-bottom-left-radius: 5px; }
+  .turn.patient   { align-self: flex-end;   background: var(--card); color: var(--ink-2); box-shadow: var(--shadow-sm); border-bottom-right-radius: 5px; }
+  .turn.cost-worry {
+    background: var(--accent-050);
+    border: 1px solid var(--accent-100);
+    color: #7c2f14;
+    box-shadow: none;
+  }
+  .turn.cost-worry .speaker { color: var(--accent-ink); }
+
+  .note-block { margin-bottom: 16px; }
+  .note-block:last-of-type { margin-bottom: 0; }
+  .note-label {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--faint);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .note-text { font-size: 15px; line-height: 1.7; color: var(--ink-2); white-space: pre-line; }
+
   .signed-order {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: #ecfdf5;
-    border: 1px solid #bbf0dd;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 13.5px;
-    margin-top: 6px;
+    gap: 13px;
+    background: #faf5f0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 13px 17px;
+    font-size: 14.5px;
+    color: var(--ink-2);
+    margin-top: 4px;
   }
   .signed-order .stamp {
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--good);
-    background: white;
-    border: 1px solid var(--good);
-    border-radius: 4px;
-    padding: 2px 6px;
+    letter-spacing: 0.06em;
+    color: #fff;
+    background: var(--ink);
+    border-radius: 6px;
+    padding: 3px 10px;
     white-space: nowrap;
   }
 
-  /* ---------- new: STEP 2 patient sidebar (own panel, does not touch .panel#encounter-panel) ---------- */
-  .patient-sidebar {
+  /* =========================================================================
+     Delta banner — a top hero of the price beat
+     ========================================================================= */
+  .delta-banner {
     background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 20px;
+    border-radius: var(--radius-md);
+    padding: 22px 28px;
+    margin-bottom: 22px;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 14px 26px;
+    gap: 8px 20px;
+    box-shadow: var(--shadow);
   }
-  .patient-sidebar .field { font-size: 12.5px; }
-  .patient-sidebar .field .k { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); margin-bottom: 2px; }
-  .patient-sidebar .field .v { color: var(--ink); }
-  .patient-sidebar .field.name .v { font-weight: 700; font-size: 14px; }
-
-  /* ---------- new: buttons ---------- */
-  .primary-btn {
-    display: inline-block;
-    background: var(--accent);
-    color: white;
-    border: none;
+  .delta-banner .label {
     font-size: 14px;
-    font-weight: 600;
-    padding: 11px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 6px;
+    color: var(--muted);
+    font-weight: 500;
+    max-width: 58%;
   }
-  .primary-btn:hover { background: #1d4ed8; }
-  .secondary-btn {
-    display: inline-block;
-    background: white;
+  .delta-banner .amount {
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
     color: var(--accent);
-    border: 1px solid var(--accent);
-    font-size: 14px;
-    font-weight: 600;
-    padding: 10px 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 18px;
+    font-variant-numeric: tabular-nums;
   }
-  .secondary-btn:hover { background: #eff6ff; }
-  .voice-btn {
-    display: inline-block;
-    background: #e5e7eb;
-    color: #9ca3af;
-    border: 1px solid #d1d5db;
+
+  /* =========================================================================
+     Facility cards — OOP figure is the hero, citations supporting detail
+     ========================================================================= */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius-md);
+    padding: 22px 24px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 22px;
+    row-gap: 2px;
+    position: relative;
+    box-shadow: var(--shadow);
+    transition: box-shadow .15s ease;
+  }
+  .card:hover { box-shadow: var(--shadow-lift); }
+  .card.best { box-shadow: 0 0 0 1.5px var(--accent), var(--shadow-lift); }
+  .rank-badge {
+    position: absolute;
+    top: -11px;
+    left: 20px;
+    background: var(--accent-ink);
+    color: #fff;
     font-size: 13px;
     font-weight: 600;
-    padding: 9px 16px;
-    border-radius: 8px;
-    cursor: not-allowed;
-    margin-top: 14px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    letter-spacing: 0.06em;
+    box-shadow: 0 3px 8px rgba(176,51,26,.30);
+  }
+  .facility-name {
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+    grid-column: 1 / 2;
+    align-self: baseline;
+  }
+  .facility-type { font-size: 13.5px; color: var(--muted); grid-column: 1 / 2; margin-top: 3px; }
+  .facility-distance { font-size: 13.5px; color: var(--muted); grid-column: 1 / 2; margin-top: 4px; }
+  .facility-distance .pin { margin-right: 4px; opacity: 0.9; }
+
+  .oop {
+    grid-column: 2 / 3;
+    grid-row: 1 / 4;
+    align-self: start;
+    text-align: right;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .oop .oop-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--faint);
+    text-align: right;
+    margin-bottom: 3px;
+  }
+  .card.best .oop { color: var(--accent); }
+
+  .row2 {
+    grid-column: 1 / 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 13.5px;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  .rate-info { color: var(--ink-2); font-size: 14px; }
+  .rate-info .badge {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 9px;
+    border-radius: 6px;
+    margin-right: 8px;
+    background: #f1ebe3;
+    color: var(--muted);
+    vertical-align: 1px;
+  }
+  .rate-info .badge.cash { background: #f1ebe3; color: var(--ink-2); }
+  .rate-info .badge.na   { background: var(--accent-050); color: var(--accent-ink); }
+
+  /* citations: quiet supporting detail, not accent-colored until hover */
+  .source-link { font-size: 13.5px; }
+  .source-link a {
+    color: var(--faint);
+    text-decoration: underline;
+    text-decoration-color: var(--line-2);
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+  }
+  .source-link a:hover { color: var(--accent-ink); text-decoration-color: var(--accent); }
+
+  .payer-label { grid-column: 1 / 3; font-size: 13.5px; color: var(--faint); margin-top: 8px; }
+
+  /* arithmetic: the math, supporting — quiet block, tabular */
+  .arithmetic {
+    grid-column: 1 / 3;
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.6;
+    font-variant-numeric: tabular-nums;
   }
 
-  /* ---------- new: reveal sections ---------- */
+  .not-published { color: var(--accent-ink); font-weight: 700; }
+
+  footer {
+    margin-top: 34px;
+    font-size: 13px;
+    color: var(--faint);
+    text-align: center;
+    line-height: 1.7;
+  }
+  footer code { font-size: 13px; }
+
+  /* =========================================================================
+     Buttons — one accent, consistent
+     ========================================================================= */
+  .primary-btn, .secondary-btn, .confirm-btn, .ics-btn, .voice-btn {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .primary-btn {
+    display: inline-block;
+    background: var(--accent-ink);
+    color: #fff;
+    border: none;
+    padding: 13px 24px;
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(176,51,26,.22);
+  }
+  .primary-btn:hover { background: var(--accent-deep); }
+  .secondary-btn {
+    display: inline-block;
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--line-2);
+    padding: 12px 22px;
+    margin-top: 18px;
+    box-shadow: var(--shadow-sm);
+  }
+  .secondary-btn:hover { background: #faf5f0; }
+  .voice-btn {
+    display: inline-block;
+    background: #f1ebe3;
+    color: #a79f96;
+    border: none;
+    padding: 11px 20px;
+    margin-top: 16px;
+    cursor: not-allowed;
+  }
+
+  /* ---------- reveal transitions ---------- */
   .reveal { display: none; }
   .reveal.visible { display: block; animation: fadeIn 0.35s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* ---------- new: BEAT 2 mock SMS panel ---------- */
+  /* =========================================================================
+     STEP 3/BEAT 2 — mock SMS, styled as an iOS Messages thread
+     ========================================================================= */
   .sms-section { margin-top: 24px; }
-  .sms-label { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .sms-label { font-size: 13px; color: var(--faint); margin-bottom: 14px; text-align: center; }
   .phone {
-    width: 300px;
+    width: 330px;
     margin: 0 auto;
-    background: #111827;
-    border-radius: 28px;
-    padding: 14px 10px 20px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    background: #0b0b0d;
+    border-radius: 46px;
+    padding: 12px;
+    box-shadow: var(--shadow-lift), inset 0 0 0 2px #2a2a2f;
+    position: relative;
   }
   .phone-screen {
-    background: #f2f2f7;
-    border-radius: 18px;
-    padding: 14px 10px;
-    min-height: 220px;
+    background: #ffffff;
+    border-radius: 34px;
+    padding: 40px 12px 22px;
+    min-height: 300px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+  }
+  /* iOS status bar: time left, battery right */
+  .phone-screen::before {
+    content: "9:41";
+    position: absolute;
+    top: 12px; left: 22px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0b0b0d;
+    letter-spacing: -0.01em;
+  }
+  .phone-screen::after {
+    content: "";
+    position: absolute;
+    top: 15px; right: 22px;
+    width: 22px; height: 11px;
+    border: 1.5px solid #0b0b0d;
+    border-radius: 3px;
+    background:
+      linear-gradient(#0b0b0d, #0b0b0d) left center / 70% 60% no-repeat;
+    background-origin: content-box;
+    padding: 1px;
+    box-shadow: 3px 0 0 -1px #0b0b0d;
+  }
+  /* notch */
+  .phone::before {
+    content: "";
+    position: absolute;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    width: 124px; height: 26px;
+    background: #0b0b0d;
+    border-radius: 0 0 16px 16px;
+    z-index: 3;
   }
   .phone-header {
     text-align: center;
-    font-size: 11px;
-    color: #6b7280;
+    font-size: 13px;
+    color: var(--muted);
     font-weight: 600;
-    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding-bottom: 12px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #ececf0;
+  }
+  .phone-header::before {
+    content: "CT";
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: var(--accent-100);
+    color: var(--accent-ink);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    display: grid;
+    place-items: center;
   }
   .sms-bubble {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 10px 14px;
-    font-size: 12.5px;
-    line-height: 1.5;
-    color: #111827;
+    align-self: flex-start;
+    max-width: 86%;
+    background: #e9e9eb;
+    border-radius: 20px;
+    border-bottom-left-radius: 6px;
+    padding: 10px 15px;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: #0b0b0d;
     white-space: pre-line;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
     opacity: 0;
     transform: translateY(8px);
     animation: bubbleIn 0.4s ease forwards;
     animation-delay: 0.15s;
   }
   @keyframes bubbleIn { to { opacity: 1; transform: translateY(0); } }
+  .sms-bubble.pending { color: #6b6b70; font-style: italic; }
+  .sms-bubble.confirmed { background: var(--accent-050); border: 1px solid var(--accent-100); border-bottom-left-radius: 6px; color: var(--ink); }
 
-  /* ---------- new: STEP 4 confirm + calendar artifact ---------- */
+  /* =========================================================================
+     STEP 4 — confirm + calendar artifact (app controls, below the phone)
+     ========================================================================= */
   .confirm-btn {
     display: block;
-    margin: 14px auto 0;
-    background: var(--good);
-    color: white;
+    margin: 18px auto 0;
+    background: var(--accent-ink);
+    color: #fff;
     border: none;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 10px 18px;
-    border-radius: 8px;
-    cursor: pointer;
+    padding: 13px 24px;
+    box-shadow: 0 2px 8px rgba(176,51,26,.22);
   }
-  .confirm-btn:hover { background: #0d5f58; }
-  .confirm-btn:disabled { background: #9ca3af; cursor: wait; }
-  .sms-bubble.pending { color: #6b7280; font-style: italic; }
-  .sms-bubble.confirmed { border-left: 3px solid var(--good); }
-  .stub-note { font-size: 10px; color: var(--muted); text-align: center; margin-top: 6px; }
-  .reminder-line { text-align: center; font-size: 12px; color: var(--good); font-weight: 600; margin-top: 10px; }
+  .confirm-btn:hover { background: var(--accent-deep); }
+  .confirm-btn:disabled { background: #c9bfb4; box-shadow: none; cursor: wait; }
+  .stub-note { font-size: 13px; color: var(--faint); text-align: center; margin-top: 10px; line-height: 1.55; }
+  .reminder-line { text-align: center; font-size: 14px; color: var(--accent-ink); font-weight: 600; margin-top: 16px; }
   .ics-btn {
     display: block;
     margin: 12px auto 0;
-    background: white;
-    color: var(--good);
-    border: 1px solid var(--good);
-    font-size: 13px;
-    font-weight: 600;
-    padding: 9px 16px;
-    border-radius: 8px;
-    cursor: pointer;
+    background: var(--card);
+    color: var(--accent-ink);
+    border: 1px solid var(--accent-100);
+    padding: 11px 20px;
     text-decoration: none;
     text-align: center;
     width: fit-content;
   }
-  .ics-btn:hover { background: #ecfdf5; }
+  .ics-btn:hover { background: var(--accent-050); }
+
+  /* ---------- new: live-SMS send status (Twilio, via server.js) ---------- */
+  .live-status { display: inline-block; font-size: 13px; color: var(--faint); margin-left: 12px; vertical-align: middle; }
+  .live-status.ok { color: var(--accent-ink); font-weight: 600; }
+  .live-status.err { color: #b42318; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -336,6 +571,8 @@
     <div id="cards"></div>
 
     <button class="secondary-btn" id="btn-send-sms" type="button">Send options to patient</button>
+    <button class="secondary-btn" id="btn-send-live" type="button" style="margin-left:10px;">Send to patient (live)</button>
+    <div class="live-status" id="live-send-status"></div>
 
     <!-- ================= BEAT 2: mock SMS panel ================= -->
     <div class="reveal sms-section" id="sms-section">
@@ -369,6 +606,8 @@
 <!-- Generated by agent.js (run: node agent.js). Defines `const FACILITIES = [...]` and `const ENCOUNTER = {...}`. -->
 <script src="agent_output.js"></script>
 <script src="encounter_output.js"></script>
+<!-- Shared with server.js -- guarantees the live SMS and the mock SMS say the exact same thing. -->
+<script src="sms-text.js"></script>
 <script>
 // FACILITIES/ENCOUNTER come from agent.js output. If agent.js hasn't been
 // run yet, fail visibly rather than rendering blank/guessed content.
@@ -396,16 +635,15 @@ function detailLine(f) {
        + `Total OOP: ${fmt(ded)} + ${fmt(f.coinsurance_portion)} = ${fmt(f.oop)}`;
 }
 
-function sortedFacilities() {
-  return [...FACILITIES].sort((a, b) => {
-    const av = a.oop == null ? Infinity : a.oop;
-    const bv = b.oop == null ? Infinity : b.oop;
-    return av - bv;
-  });
+// Named getSortedFacilities (not sortedFacilities) so this local, no-arg
+// wrapper doesn't collide with -- and silently shadow -- sms-text.js's
+// sortedFacilities(FACILITIES), which server.js also relies on.
+function getSortedFacilities() {
+  return sortedFacilities(FACILITIES);
 }
 
 function renderOptionsCard() {
-  const sorted = sortedFacilities();
+  const sorted = getSortedFacilities();
 
   const withOop = sorted.filter(f => f.oop != null);
   if (withOop.length >= 2) {
@@ -517,28 +755,10 @@ function renderPatientSidebar() {
 }
 
 // ---------------- BEAT 2: mock SMS, built entirely from agent output ----------------
-function buildSmsText() {
-  const sorted = sortedFacilities().filter(f => f.oop != null);
-  if (sorted.length < 2) {
-    return 'Not enough published prices yet to compare facilities for this patient.';
-  }
-  const cheapest = sorted[0];
-  const priciest = sorted[sorted.length - 1];
-  const delta = fmt(priciest.oop - cheapest.oop);
-  const firstName = ENCOUNTER.patient.name.split(' ')[0];
-
-  const cheapestDistance = cheapest.distance_from_patient ? ` (${cheapest.distance_from_patient})` : '';
-
-  return `Hi ${firstName} — Dr. ${clinicianLastName()} ordered an MRI of your lower back. `
-       + `We checked prices for your ${ENCOUNTER.patient.insurance.payer} plan:\n\n`
-       + `${cheapest.facility}${cheapestDistance} — ${fmt(cheapest.oop)}\n`
-       + `${priciest.facility} — ${fmt(priciest.oop)}\n\n`
-       + `Same scan. You'd save ${delta} at ${cheapest.facility}.\n\n`
-       + `Reply SCHEDULE and we'll book it for you.`;
-}
-
+// buildOptionsSmsText comes from sms-text.js -- the SAME function server.js uses
+// for the real Twilio send, so the mock and the live SMS never drift apart.
 function renderSms() {
-  document.getElementById('sms-bubble').textContent = buildSmsText();
+  document.getElementById('sms-bubble').textContent = buildOptionsSmsText(FACILITIES, ENCOUNTER);
   document.getElementById('sms-bubble').className = 'sms-bubble';
 }
 
@@ -554,7 +774,7 @@ const APPOINTMENT = {
 };
 
 function recommendedFacility() {
-  return sortedFacilities().filter(f => f.oop != null)[0];
+  return getSortedFacilities().filter(f => f.oop != null)[0];
 }
 
 function icsEscape(text) {
@@ -656,6 +876,31 @@ document.getElementById('btn-send-sms').addEventListener('click', () => {
   void smsSection.offsetWidth;
   smsSection.classList.add('visible');
   smsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+// ---------------- Real Twilio send (requires server.js running; see RUN_NOTES.md) ----------------
+// This does NOT replace the mock beat above -- it is a separate, additive control that
+// POSTs to the local server, which builds the identical text via sms-text.js and sends
+// it through Twilio. If server.js isn't running, or this page was opened via file://
+// instead of http://localhost:<port>/options_card.html, the fetch fails and we say so.
+document.getElementById('btn-send-live').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-send-live');
+  const status = document.getElementById('live-send-status');
+  btn.disabled = true;
+  status.className = 'live-status';
+  status.textContent = 'Sending via Twilio…';
+  try {
+    const res = await fetch('/send', { method: 'POST' });
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    status.className = 'live-status ok';
+    status.textContent = `Sent (Twilio SID ${data.sid}).`;
+  } catch (err) {
+    status.className = 'live-status err';
+    status.textContent = 'Live send failed -- is server.js running, and is this page loaded from http://localhost, not file://? (' + err.message + ')';
+  } finally {
+    btn.disabled = false;
+  }
 });
 
 // initial render (encounter panel + options card content; options card stays
