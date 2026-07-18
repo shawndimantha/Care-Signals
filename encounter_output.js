@@ -16,7 +16,7 @@ const ENCOUNTER = {
     "phone": "(555) 014-2938",
     "insurance": {
       "payer": "Cigna",
-      "plan": "PPO",
+      "plan": "HDHP",
       "deductible_total": 3000,
       "deductible_met": 0,
       "coinsurance_rate_after_deductible": 0.2
