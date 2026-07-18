@@ -11,3 +11,4 @@ Abridge UI.avif
 
 # scratch static deploy bundle
 care-signals-demo/
+.env*
