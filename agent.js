@@ -73,7 +73,13 @@ function step2(prices, cpt, payer) {
   for (const row of rows) {
     const key = baseName(row.facility);
     if (!byFacility.has(key)) {
-      byFacility.set(key, { facility: key, facility_type: row.facility_type, rows: [] });
+      byFacility.set(key, {
+        facility: key,
+        facility_type: row.facility_type,
+        facility_address: row.facility_address || null,
+        distance_from_patient: row.distance_from_patient || null,
+        rows: [],
+      });
     }
     byFacility.get(key).rows.push(row);
   }
@@ -174,6 +180,8 @@ function step4(byFacility, patientPlan, cachedRanked) {
     results.push({
       facility: entry.facility,
       facility_type: entry.facility_type,
+      facility_address: entry.facility_address,
+      distance_from_patient: entry.distance_from_patient,
       rate_used: rateUsed,
       rate_type: rateType,
       payer_label: payerLabel,

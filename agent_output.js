@@ -4,6 +4,8 @@ const FACILITIES = [
   {
     "facility": "UCSF Medical Center",
     "facility_type": "academic/large-system hospital",
+    "facility_address": "505 Parnassus Ave, San Francisco, CA 94143",
+    "distance_from_patient": "~3.8 mi · ~15 min drive (approx.)",
     "rate_used": 2704.8,
     "rate_type": "cash",
     "payer_label": "Cash / self-pay, no Cigna contract found (sum of 2 chargemaster components)",
@@ -16,6 +18,8 @@ const FACILITIES = [
   {
     "facility": "California Pacific Medical Center - Van Ness Campus",
     "facility_type": "community hospital",
+    "facility_address": "1101 Van Ness Ave, San Francisco, CA 94109",
+    "distance_from_patient": "~0.3 mi · ~3 min drive (approx.)",
     "rate_used": 2849,
     "rate_type": "negotiated",
     "payer_label": "Cigna (HMO/PPO), negotiated $2,849.00",
@@ -28,6 +32,8 @@ const FACILITIES = [
   {
     "facility": "Saint Francis Memorial Hospital",
     "facility_type": "hospital-affiliated outpatient imaging",
+    "facility_address": "900 Hyde St, San Francisco, CA 94109",
+    "distance_from_patient": "~0.6 mi · ~4 min drive (approx.)",
     "rate_used": 4935,
     "rate_type": "negotiated",
     "payer_label": "Cigna (Commercial | All Other Plans), negotiated $4,935.00",
@@ -40,6 +46,8 @@ const FACILITIES = [
   {
     "facility": "SimonMed Imaging - San Francisco - Sfmrc",
     "facility_type": "freestanding imaging center",
+    "facility_address": "1180 Post St, San Francisco, CA 94109",
+    "distance_from_patient": "~0.4 mi · ~3 min drive (approx.)",
     "rate_used": 586,
     "rate_type": "cash",
     "payer_label": "Cash / self-pay, no Cigna contract found",

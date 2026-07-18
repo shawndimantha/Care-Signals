@@ -46,7 +46,7 @@ Dignity Health's former San Francisco hospital (St. Mary's Medical Center) was r
 
 ## Local files written
 
-- `prices_72148.json` — 18 rows, schema `{facility, facility_type, payer, plan, rate, rate_type, cpt, source_url, source_line_or_field}`
+- `prices_72148.json` — 18 rows, schema `{facility, facility_type, payer, plan, rate, rate_type, cpt, source_url, source_line_or_field, facility_address, distance_from_patient}`. The last two fields were added 2026-07-18: `facility_address` is the real street address pulled from each facility's own MRF/source page (already cited via `source_url`); `distance_from_patient` is a hand-estimated, rounded, explicitly-"(approx.)" driving distance/time from a synthetic demo patient's home address — not from a mapping API. See `RUN_NOTES.md` for the estimation method.
 - `data_card.md` — this file
 
 Both saved under: `/private/tmp/claude-501/-Users-shawndimantha-claudeprojects-agentic-health-hack/3a17db48-d678-4a91-a09c-74ecd3dc6e5f/scratchpad/mrf/`

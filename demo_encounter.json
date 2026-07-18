@@ -1,10 +1,17 @@
 {
   "_disclaimer": "SYNTHETIC DEMO DATA. Patient, clinician, and encounter are fictional. No real PHI. For hackathon/demo purposes only.",
   "patient": {
-    "name": "Jane Demo-Patient",
+    "name": "Jane Whitfield",
     "age": 54,
     "sex": "F",
     "mrn": "SYN-000001",
+    "address": {
+      "street": "1450 Sutter St, Apt 4",
+      "city": "San Francisco",
+      "state": "CA",
+      "zip": "94109"
+    },
+    "phone": "(555) 014-2938",
     "insurance": {
       "payer": "Cigna",
       "plan": "PPO",
@@ -38,7 +45,7 @@
   },
   "signed_order": {
     "order_text": "MRI lumbar spine without contrast",
-    "ordering_clinician": "Dr. A. Rivera, MD (synthetic)",
+    "ordering_clinician": "Dr. A. Rivera, MD",
     "signed_datetime_synthetic": "2026-07-15T10:42:00-07:00",
     "status": "signed"
   }

@@ -92,6 +92,10 @@
   /* ---------- new: BEAT 0 payer-label line (appended below existing row2, does not alter it) ---------- */
   .payer-label { grid-column: 1 / 3; font-size: 11px; color: var(--muted); margin-top: 4px; }
 
+  /* ---------- new: distance chip, appended next to facility-name (does not alter existing card grid) ---------- */
+  .facility-distance { font-size: 11px; color: var(--muted); grid-column: 1 / 2; margin-top: 1px; }
+  .facility-distance .pin { margin-right: 3px; }
+
   /* ---------- new: top disclaimer (unobtrusive) ---------- */
   .disclaimer {
     font-size: 11px;
@@ -151,6 +155,22 @@
     padding: 2px 6px;
     white-space: nowrap;
   }
+
+  /* ---------- new: STEP 2 patient sidebar (own panel, does not touch .panel#encounter-panel) ---------- */
+  .patient-sidebar {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 26px;
+  }
+  .patient-sidebar .field { font-size: 12.5px; }
+  .patient-sidebar .field .k { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); margin-bottom: 2px; }
+  .patient-sidebar .field .v { color: var(--ink); }
+  .patient-sidebar .field.name .v { font-weight: 700; font-size: 14px; }
 
   /* ---------- new: buttons ---------- */
   .primary-btn {
@@ -236,13 +256,52 @@
     animation-delay: 0.15s;
   }
   @keyframes bubbleIn { to { opacity: 1; transform: translateY(0); } }
+
+  /* ---------- new: STEP 4 confirm + calendar artifact ---------- */
+  .confirm-btn {
+    display: block;
+    margin: 14px auto 0;
+    background: var(--good);
+    color: white;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .confirm-btn:hover { background: #0d5f58; }
+  .confirm-btn:disabled { background: #9ca3af; cursor: wait; }
+  .sms-bubble.pending { color: #6b7280; font-style: italic; }
+  .sms-bubble.confirmed { border-left: 3px solid var(--good); }
+  .stub-note { font-size: 10px; color: var(--muted); text-align: center; margin-top: 6px; }
+  .reminder-line { text-align: center; font-size: 12px; color: var(--good); font-weight: 600; margin-top: 10px; }
+  .ics-btn {
+    display: block;
+    margin: 12px auto 0;
+    background: white;
+    color: var(--good);
+    border: 1px solid var(--good);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    width: fit-content;
+  }
+  .ics-btn:hover { background: #ecfdf5; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <span class="disclaimer">Synthetic demo data — fictional patient, no real PHI.</span>
   <h1>MRI Lumbar Spine, No Contrast — CPT 72148</h1>
-  <p class="subtitle">San Francisco, CA · Patient plan: Cigna PPO · $3,000 deductible ($0 met) · 20% coinsurance after deductible</p>
+  <p class="subtitle" id="subtitle">San Francisco, CA · Patient plan: Cigna PPO · $3,000 deductible ($0 met) · 20% coinsurance after deductible</p>
+
+  <!-- ================= STEP 2: Patient sidebar (visible before the price beat) ================= -->
+  <div class="patient-sidebar" id="patient-sidebar"></div>
 
   <!-- ================= BEAT 1: Encounter panel ================= -->
   <div class="panel" id="encounter-panel">
@@ -282,11 +341,20 @@
     <div class="reveal sms-section" id="sms-section">
       <div class="sms-label">Simulated message — demo only. No SMS API, no real send.</div>
       <div class="phone">
-        <div class="phone-screen">
+        <div class="phone-screen" id="phone-screen">
           <div class="phone-header">Messages · Care Team</div>
           <div class="sms-bubble" id="sms-bubble"></div>
         </div>
       </div>
+
+      <button class="confirm-btn" id="btn-confirm" type="button">Confirm SimonMed and schedule</button>
+      <div class="stub-note">Stubbed handoff for this demo — no real phone call is placed. Real scheduling call/API is next-build scope.</div>
+
+      <div class="reveal" id="reminder-line-wrap">
+        <div class="reminder-line" id="reminder-line"></div>
+        <a class="ics-btn" id="btn-ics" href="#" download="appointment.ics">Add appointment to calendar (.ics)</a>
+      </div>
+
       <div style="text-align:center;">
         <button class="voice-btn" type="button" disabled>Schedule via voice agent (coming soon)</button>
       </div>
@@ -320,7 +388,7 @@ function detailLine(f) {
   if (f.rate_type === 'cash') {
     return `${fmt(f.rate_used)} — cash price, paid directly`;
   }
-  const remaining = 3000;
+  const remaining = ENCOUNTER.patient.insurance.deductible_total - ENCOUNTER.patient.insurance.deductible_met;
   const ded = f.deductible_portion;
   const balance = Math.max(0, f.rate_used - remaining);
   return `Deductible portion: min(${fmt(f.rate_used)}, ${fmt(remaining)}) = ${fmt(ded)}  ·  `
@@ -363,6 +431,7 @@ function renderOptionsCard() {
         ${isBest ? '<div class="rank-badge">LOWEST OUT-OF-POCKET</div>' : ''}
         <div class="facility-name">${f.facility}</div>
         <div class="facility-type">${f.facility_type}</div>
+        ${f.distance_from_patient ? `<div class="facility-distance"><span class="pin">📍</span>${f.distance_from_patient}</div>` : ''}
         <div class="oop">
           <span class="oop-label">Patient out-of-pocket</span>
           ${oopDisplay}
@@ -423,6 +492,30 @@ function renderSignedOrder() {
     `<span>${ENCOUNTER.signed_order.order_text} — signed by ${clinicianFullName()}, ${signedDateTimeDisplay()}</span>`;
 }
 
+// ---------------- STEP 2: patient sidebar ----------------
+function renderPatientSidebar() {
+  const p = ENCOUNTER.patient;
+  const ins = p.insurance;
+  const deductibleMet = fmt(ins.deductible_met);
+  const deductibleTotal = fmt(ins.deductible_total);
+  const addr = p.address ? `${p.address.street}, ${p.address.city}, ${p.address.state} ${p.address.zip}` : 'not on file';
+
+  document.getElementById('subtitle').textContent =
+    `San Francisco, CA · Patient plan: ${ins.payer} ${ins.plan} · ${deductibleTotal} deductible (${deductibleMet} met) · `
+    + `${Math.round(ins.coinsurance_rate_after_deductible * 100)}% coinsurance after deductible`;
+
+  const field = (k, v) => `<div class="field"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+
+  document.getElementById('patient-sidebar').innerHTML =
+    `<div class="field name"><span class="k">Patient</span><span class="v">${p.name}</span></div>` +
+    field('Age / Sex', `${p.age}${p.sex}`) +
+    field('MRN', p.mrn) +
+    field('Address', addr) +
+    field('Phone', p.phone || 'not on file') +
+    field('Plan', `${ins.payer} ${ins.plan}`) +
+    field('Deductible', `${deductibleMet} of ${deductibleTotal} met`);
+}
+
 // ---------------- BEAT 2: mock SMS, built entirely from agent output ----------------
 function buildSmsText() {
   const sorted = sortedFacilities().filter(f => f.oop != null);
@@ -434,9 +527,11 @@ function buildSmsText() {
   const delta = fmt(priciest.oop - cheapest.oop);
   const firstName = ENCOUNTER.patient.name.split(' ')[0];
 
+  const cheapestDistance = cheapest.distance_from_patient ? ` (${cheapest.distance_from_patient})` : '';
+
   return `Hi ${firstName} — Dr. ${clinicianLastName()} ordered an MRI of your lower back. `
        + `We checked prices for your ${ENCOUNTER.patient.insurance.payer} plan:\n\n`
-       + `${cheapest.facility} — ${fmt(cheapest.oop)}\n`
+       + `${cheapest.facility}${cheapestDistance} — ${fmt(cheapest.oop)}\n`
        + `${priciest.facility} — ${fmt(priciest.oop)}\n\n`
        + `Same scan. You'd save ${delta} at ${cheapest.facility}.\n\n`
        + `Reply SCHEDULE and we'll book it for you.`;
@@ -444,6 +539,101 @@ function buildSmsText() {
 
 function renderSms() {
   document.getElementById('sms-bubble').textContent = buildSmsText();
+  document.getElementById('sms-bubble').className = 'sms-bubble';
+}
+
+// ---------------- STEP 4: confirm + schedule (stubbed) + .ics artifact ----------------
+// Synthetic appointment slot -- fixed for this demo so the .ics is deterministic and
+// reproducible on every run. Not derived from any real scheduling system.
+const APPOINTMENT = {
+  dateDisplay: 'Wednesday, July 22, 2026',
+  timeDisplay: '9:30 AM – 10:00 AM',
+  // ICS times in UTC (America/Los_Angeles is UTC-7 in July, so 9:30-10:00 PDT = 16:30-17:00 UTC).
+  dtStartUTC: '20260722T163000Z',
+  dtEndUTC: '20260722T170000Z',
+};
+
+function recommendedFacility() {
+  return sortedFacilities().filter(f => f.oop != null)[0];
+}
+
+function icsEscape(text) {
+  return String(text)
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\n/g, '\\n');
+}
+
+function buildICS(facility) {
+  const uid = `care-signals-${Date.now()}@demo.local`;
+  const dtStamp = APPOINTMENT.dtStartUTC; // fixed/deterministic for the demo
+  const priceLine = facility.rate_type === 'cash'
+    ? `Cash price, paid directly: ${fmt(facility.rate_used)}`
+    : `Cigna-negotiated rate: ${fmt(facility.rate_used)}, estimated patient out-of-pocket: ${fmt(facility.oop)}`;
+
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Care Signals Demo//EN',
+    'CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${dtStamp}`,
+    `DTSTART:${APPOINTMENT.dtStartUTC}`,
+    `DTEND:${APPOINTMENT.dtEndUTC}`,
+    `SUMMARY:${icsEscape('MRI Lumbar Spine (CPT 72148) - ' + facility.facility)}`,
+    `LOCATION:${icsEscape(facility.facility_address || facility.facility)}`,
+    `DESCRIPTION:${icsEscape('CPT 72148, MRI lumbar spine without contrast. ' + priceLine + '. Please arrive 15 minutes early.')}`,
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    `DESCRIPTION:${icsEscape('Reminder: MRI appointment at ' + facility.facility)}`,
+    'TRIGGER:-P1D',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ];
+  return lines.join('\r\n') + '\r\n';
+}
+
+function wireConfirmButton() {
+  const btn = document.getElementById('btn-confirm');
+  btn.addEventListener('click', () => {
+    const facility = recommendedFacility();
+    if (!facility) return;
+
+    btn.disabled = true;
+    const bubble = document.getElementById('sms-bubble');
+
+    // a) pending state -- explicitly a stub, no real telephony
+    bubble.textContent = 'Calling SimonMed to schedule… (stub — no real call is being placed)';
+    bubble.className = 'sms-bubble pending';
+
+    setTimeout(() => {
+      // b) confirmation with a concrete synthetic appointment slot
+      bubble.className = 'sms-bubble confirmed';
+      bubble.textContent =
+        `Confirmed! Your MRI lumbar spine (CPT 72148) is booked:\n\n` +
+        `${facility.facility}\n${facility.facility_address || ''}\n` +
+        `${APPOINTMENT.dateDisplay}, ${APPOINTMENT.timeDisplay}\n` +
+        `Price: ${fmt(facility.rate_used)}${facility.rate_type === 'cash' ? ' (cash, paid directly)' : ` (Cigna-negotiated; est. OOP ${fmt(facility.oop)})`}`;
+
+      // c) reminder line
+      document.getElementById('reminder-line').textContent = 'Reminder queued for 24 hours before';
+      document.getElementById('reminder-line-wrap').classList.add('visible');
+
+      // d) real, downloadable .ics generated client-side (Blob + object URL)
+      const icsContent = buildICS(facility);
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const icsLink = document.getElementById('btn-ics');
+      icsLink.href = url;
+      icsLink.download = `MRI-lumbar-spine-${facility.facility.replace(/[^a-z0-9]+/gi, '-')}.ics`;
+
+      btn.disabled = false;
+      btn.textContent = 'Confirmed ✓';
+    }, 1400);
+  });
 }
 
 // ---------------- wire up the two clicks ----------------
@@ -454,6 +644,12 @@ document.getElementById('btn-check-cost').addEventListener('click', () => {
 
 document.getElementById('btn-send-sms').addEventListener('click', () => {
   renderSms();
+  // reset any prior confirm/schedule state so repeated demo runs start clean
+  document.getElementById('reminder-line-wrap').classList.remove('visible');
+  const confirmBtn = document.getElementById('btn-confirm');
+  confirmBtn.disabled = false;
+  confirmBtn.textContent = 'Confirm SimonMed and schedule';
+
   const smsSection = document.getElementById('sms-section');
   smsSection.classList.remove('visible');
   // restart the bubble animation each time the button is clicked
@@ -464,10 +660,12 @@ document.getElementById('btn-send-sms').addEventListener('click', () => {
 
 // initial render (encounter panel + options card content; options card stays
 // hidden behind .reveal until "Check patient cost" is clicked)
+renderPatientSidebar();
 renderTranscript();
 renderClinicalNote();
 renderSignedOrder();
 renderOptionsCard();
+wireConfirmButton();
 </script>
 </body>
 </html>

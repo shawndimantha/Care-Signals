@@ -1,27 +1,46 @@
-# Run Notes — 2026-07-18, third pass (encounter panel + mock SMS, verified in a real browser)
+# Run Notes — 2026-07-18, fourth pass (patient context, distance, confirm + calendar artifact)
 
 ## What changed
 
-**BEAT 0 — payer_label surfaced.** `options_card.html`'s card template now renders a `.payer-label` line under the existing badge/billed-rate row for every facility (e.g. "Cash / self-pay, no Cigna contract found (sum of 2 chargemaster components)" or "Cigna (HMO/PPO), negotiated $2,849.00"). Pulled straight from `agent_output.js`'s `payer_label` field, which `agent.js` already produced in the prior pass — this was purely a rendering gap, not a data gap.
+**STEP 2 — Patient sidebar.** `demo_encounter.json`'s `patient` object now has a real-shaped `address` (`1450 Sutter St, Apt 4, San Francisco, CA 94109` — a plausible Polk Gulch/Van Ness-corridor address, invented for the demo, not tied to any real person) and a `555` phone number (`(555) 014-2938`, the standard fictional-number prefix). The name is now "Jane Whitfield" instead of the placeholder-looking "Jane Demo-Patient." The clinician's display name dropped the `(synthetic)` suffix (`Dr. A. Rivera, MD`) per instruction — the top-level `_disclaimer` field and the page footer are untouched, so the synthetic-data labeling is still intact elsewhere.
 
-**BEAT 1 — encounter panel.** Added a new panel above the options card: the ambient transcript rendered as chat-style clinician/patient bubbles (clinician left-aligned/indigo, patient right-aligned/grey), the patient's cost-worry line auto-detected via a `/worried|worry|cost/i` regex on the transcript text and highlighted in amber, then the HPI, then Assessment & Plan, then the signed order as a distinct green "Signed" stamp: *"MRI lumbar spine without contrast — signed by Dr. A. Rivera, 2026-07-15 10:42"*. A **"Check patient cost"** button reveals the (untouched) options card below it.
+`options_card.html` gained a new `.patient-sidebar` panel, rendered above the encounter panel (so it's visible before the "Check patient cost" click and before any price data shows): name, age/sex, MRN, address, phone, payer+plan, and `"$0.00 of $3,000.00 met"` — all pulled from `ENCOUNTER`, nothing hardcoded. The page subtitle line (previously a static "$3,000 deductible ($0 met)" string) is now also generated from the same data, and the deductible/coinsurance arithmetic in the cards now reads the deductible total from `ENCOUNTER` instead of a hardcoded `3000` — both were latent hardcodes from earlier passes, fixed while touching this area.
 
-To keep this working from `file://` with no fetch/CORS issues, `agent.js` now also writes `encounter_output.js` (a plain `const ENCOUNTER = {...}` copied straight from `demo_encounter.json`), loaded via `<script src="encounter_output.js">` the same way `agent_output.js` already was. No new data-loading mechanism was introduced.
+**STEP 3 — Distance from the patient.** Added `facility_address` and `distance_from_patient` to every row in `prices_72148.json`. Addresses are real, pulled straight from the same source files already cited in each row (`hospital_address` field in the UCSF and Hyde Hospital MRFs, the `hospital_address` column in the CPMC CSV, and the address already embedded in the SimonMed facility name from the MDsave page):
+  - UCSF Medical Center (Parnassus): 505 Parnassus Ave, San Francisco, CA 94143
+  - California Pacific Medical Center – Van Ness: 1101 Van Ness Ave, San Francisco, CA 94109
+  - Saint Francis Memorial Hospital (Hyde Hospital): 900 Hyde St, San Francisco, CA 94109
+  - SimonMed Imaging – San Francisco – Sfmrc: 1180 Post St, San Francisco, CA 94109
 
-**BEAT 2 — mock SMS.** Below the options card, a **"Send options to patient"** button reveals a phone-styled panel with an animated-in SMS bubble. The message text is generated at render time from `FACILITIES` (sorted by OOP — cheapest and priciest, same logic as the delta banner) and `ENCOUNTER` (patient first name, ordering clinician's last name, payer) — every dollar figure and facility name in the message is computed, not typed in. It's labeled "Simulated message — demo only. No SMS API, no real send." Below it, a disabled, greyed "Schedule via voice agent (coming soon)" button — not wired to anything, per instructions.
+Distances/times are **hand-estimated from known San Francisco street geography** (Polk Gulch/Van Ness corridor as the reference point) — I did not call a mapping API. Every value is rounded and explicitly suffixed `(approx.)`: SimonMed ~0.4 mi/~3 min, CPMC ~0.3 mi/~3 min, Hyde ~0.6 mi/~4 min, UCSF Parnassus ~3.8 mi/~15 min (across town, near Golden Gate Park). These are directionally correct given the real addresses but should be treated as rough estimates, not turn-by-turn numbers — flagging this so nobody in Q&A mistakes them for a live routing API result.
 
-**Did not touch:** the `.card`, `.delta-banner`, `.oop`, `.row2`, `.rate-info`, `.arithmetic` CSS/markup from the existing options card — only appended the new `.payer-label` div inside each card and wrapped the whole options-card block in a `.reveal` container for the click-to-show behavior. `prices_72148.json`, `oop_scenarios.json`, `data_card.md` are unchanged this pass.
+`agent.js` now carries `facility_address`/`distance_from_patient` through from `prices_72148.json` into `agent_output.js` per facility (added to the grouping step and the final result objects — no new pipeline step, just two more fields riding along the existing ones). `options_card.html` renders the distance as a small "📍" line under the facility name/type on each card, sort order unchanged (still ascending by patient OOP), and the recommended (cheapest) facility's distance is included in the mock SMS text.
+
+**STEP 4 — Confirm + calendar artifact.** After the existing SMS beat, a new **"Confirm SimonMed and schedule"** button:
+  1. Disables itself and turns the SMS bubble into a pending state: *"Calling SimonMed to schedule… (stub — no real call is being placed)"* — labeled explicitly as a stub under the button too ("Stubbed handoff for this demo... Real scheduling call/API is next-build scope."). No telephony of any kind is implemented.
+  2. After ~1.4s, resolves to a confirmation message with a concrete synthetic appointment slot (Wednesday, July 22, 2026, 9:30–10:00 AM, at whichever facility is currently ranked cheapest, with its address and price — all read live from `FACILITIES`, not typed in).
+  3. Shows "Reminder queued for 24 hours before."
+  4. Builds a real `.ics` file client-side (`Blob` + `URL.createObjectURL`, no server) and points a download link at it.
+
+The appointment date/time itself is a fixed synthetic slot (not derived from any real scheduler) so the `.ics` is reproducible; every other field in it (facility name, address, price, CPT code) comes from the agent's live data.
 
 ## Verification
 
-Ran this in an actual browser, not a stubbed DOM: used the Playwright Chromium binary already cached on this machine (`~/Library/Caches/ms-playwright/chromium-1208`) to load `options_card.html` via a real `file://` URL, then:
-- confirmed the options section is hidden on load and the transcript/note/signed-order render correctly (11 transcript turns, exactly 1 cost-worry highlight, correct HPI/signed-order text)
-- clicked **"Check patient cost"** → options section becomes visible, 4 cards render, delta shows `$2,801.00`, all 4 `payer_label` lines present, cash rows show `"$X — cash price, paid directly"` with no formula, negotiated rows show the full deductible+coinsurance arithmetic
-- clicked **"Send options to patient"** → SMS panel becomes visible, bubble text reads exactly as expected with live-computed names/prices (SimonMed $586.00 / Saint Francis Memorial Hospital $3,387.00 / save $2,801.00), voice-agent button confirmed `disabled`
-- captured a full-page screenshot after both clicks and visually reviewed it — layout, highlight, phone panel, and disclaimer all render as intended
-- zero browser console errors or page errors during the whole run
+Same method as the prior pass — real Chromium via Playwright (`~/Library/Caches/ms-playwright/chromium-1208`), not a stubbed DOM, loaded via an actual `file://` URL:
+- Sidebar renders correctly before any click, with the new address/phone/deductible fields.
+- All 4 cards show a distance line; sort order confirmed still ascending by OOP (SimonMed → UCSF → CPMC → Hyde).
+- SMS text includes the distance suffix on the recommended facility.
+- Clicked "Confirm SimonMed and schedule": confirmed the button disables, the pending stub text appears, then after the delay the confirmation text, reminder line, and `.ics` download link all appear with the right data.
+- Fetched the actual blob URL contents from the page and saved the `.ics` to disk, then **parsed it with the Python `icalendar` library** (installed for this check) — it parsed cleanly: valid `VCALENDAR`/`VEVENT`, correct `DTSTART`/`DTEND` in UTC (16:30–17:00Z = 9:30–10:00 AM PDT), `UID`, `SUMMARY`, `LOCATION`, `DESCRIPTION`, and a working `VALARM` with a `-P1D` trigger. Verified CRLF line endings throughout (RFC 5545 requires CRLF, not bare `\n`) and that comma/semicolon-bearing fields (`LOCATION`, `DESCRIPTION`) round-trip correctly through the escaping.
+- Zero browser console or page errors across the whole run.
+- Full-page screenshot reviewed visually — no layout shift; the pre-existing "Check patient cost" and "Send options to patient" buttons are still exactly where they were, nothing new sits on top of them.
+
+## Did not touch
+
+The `.card`, `.delta-banner`, `.oop`, `.row2`, `.rate-info`, `.arithmetic`, `.transcript`/`.turn`, and `.sms-bubble`/`.phone` CSS and markup are unchanged except for the two additive lines specified (`.facility-distance` under the facility name, and the new confirm/reminder/`.ics` elements appended after the existing SMS bubble/voice button — nothing removed or restyled).
 
 ## To check
 
-- The SMS message uses full facility names as they appear in `agent_output.js` (e.g. "SimonMed Imaging - San Francisco - Sfmrc") rather than the shorter "SimonMed Imaging (1180 Post St)" style from the original example — the address isn't in the agent's per-facility output today. Cosmetic only; every dollar figure is still fully dynamic. Say if you want the street address pulled in too (it's in `prices_72148.json` and would need a small addition to `agent.js`'s output).
-- Re-run `node agent.js` any time `demo_encounter.json`, `prices_72148.json`, or `oop_scenarios.json` change — it regenerates both `agent_output.js` and `encounter_output.js`, and the page picks up the new data on next load with no other changes needed.
+- The distances are estimates, not from a mapping API — good enough for a demo narrative ("everything's within a few blocks except UCSF") but say so up front if asked how precise they are.
+- The appointment slot (July 22, 2026, 9:30 AM) is fixed/synthetic and does not change if the recommended facility changes on a future data refresh — only the facility name/address/price in the confirmation text and `.ics` update dynamically. If you want the slot itself to vary, that's a follow-up.
+- This pass is **not yet committed to git** (the repo from the last session, `shawndimantha/Care-Signals`, exists but the working tree now has uncommitted changes) — say the word if you want it committed and pushed.
