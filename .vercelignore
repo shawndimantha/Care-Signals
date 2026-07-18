@@ -1,0 +1,18 @@
+# Keep the Vercel deploy a pure static site (the demo is fully client-side).
+# Excluding package.json/server.js so Vercel does not treat this as a Node app
+# or try to run the Express server. The live WhatsApp send runs on the local
+# server only; the hosted demo shows the full flow with a message preview.
+.env
+node_modules
+server.js
+package.json
+package-lock.json
+agent.js
+options_card.html
+options_card_v1.html
+data_card.md
+RUN_NOTES.md
+prices_72148.json
+oop_scenarios.json
+demo_encounter.json
+.git

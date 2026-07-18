@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Care Signals — Care Navigation</title>
+<link rel="icon" href="data:,"><!-- suppress the /favicon.ico 404 -->
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<div class="wrap">
+  <span class="disclaimer">Synthetic demo data — fictional patient, no real PHI.</span>
+  <h1>MRI Lumbar Spine, No Contrast — CPT 72148</h1>
+  <p class="subtitle" id="subtitle">San Francisco, CA · Patient plan: Cigna PPO · $3,000 deductible ($0 met) · 20% coinsurance after deductible</p>
+
+  <div class="layout nav-layout">
+    <!-- ===================== LEFT: agent terminal (autonomous) ===================== -->
+    <section class="nav-left">
+      <div class="agent-status" id="agent-status">
+        <span class="dot"></span>
+        <span id="agent-status-text">Agent running — no clinician input required</span>
+        <span class="sub" id="agent-status-sub"></span>
+      </div>
+      <div class="terminal" id="terminal"></div>
+    </section>
+
+    <!-- ===================== RIGHT: options card + patient outreach ===================== -->
+    <section class="nav-right">
+      <div class="delta-banner">
+        <div><span class="label">Cheapest vs. most expensive option, same code</span></div>
+        <div class="amount" id="delta-amount">—</div>
+      </div>
+
+      <div id="cards"></div>
+
+      <!-- patient-message beat: appears automatically once prices resolve.
+           The real WhatsApp send is the ONE presenter-controlled advance. -->
+      <div class="beat-card reveal" id="patient-msg-beat">
+        <div class="beat-head"><span class="wa-mark" id="wa-mark">✦</span><span id="patient-msg-title">Ready to message patient on WhatsApp</span></div>
+        <div class="beat-body" id="patient-msg-body"></div>
+        <div class="beat-time" id="patient-msg-time"></div>
+        <button class="advance-btn" id="btn-advance" type="button">Send options to patient on WhatsApp →</button>
+        <div class="advance-hint" id="advance-hint">The agent finished unattended. This is the one manual step — sending the patient's message.</div>
+      </div>
+
+      <!-- scheduling confirmation + calendar artifact -->
+      <div class="beat-card reveal" id="schedule-beat">
+        <div class="beat-head"><span class="wa-mark" style="background:#3f9d6b">✓</span><span>Appointment booked</span></div>
+        <div class="beat-body" id="schedule-body"></div>
+        <div class="reminder-line" id="reminder-line" style="text-align:left;margin-top:12px;"></div>
+        <a class="ics-btn" id="btn-ics" href="#" download="appointment.ics" style="margin:12px 0 0;">Add appointment to calendar (.ics)</a>
+      </div>
+
+      <!-- ===== mock message panel: PRESERVED, hidden behind USE_MOCK_SMS ===== -->
+      <div class="reveal sms-section" id="sms-section">
+        <div class="sms-label">Simulated message — demo only. No SMS API, no real send.</div>
+        <div class="phone">
+          <div class="phone-screen" id="phone-screen">
+            <div class="phone-header">Messages · Care Team</div>
+            <div class="sms-bubble" id="sms-bubble"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    Prices sourced from published hospital machine-readable files and MDsave live pricing pages. See <code>data_card.md</code> for full provenance and schema notes. Not medical or financial advice.
+  </footer>
+</div>
+
+<script src="agent_output.js"></script>
+<script src="encounter_output.js"></script>
+<script src="sms-text.js"></script>
+<script src="demo.js"></script>
+<script>
+// ===== One-line fallback switch: flip to true to use the simulated phone =====
+// panel instead of the live Twilio WhatsApp /send path. =====================
+const USE_MOCK_SMS = false;
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+function scrollToEl(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+const shortName = (f) => f.facility.split(' - ')[0];
+
+// header
+(function renderHeader() {
+  const ins = ENCOUNTER.patient.insurance;
+  document.getElementById('subtitle').textContent =
+    `${ENCOUNTER.patient.name} · ${ENCOUNTER.patient.age}${ENCOUNTER.patient.sex} · ${ins.payer} ${ins.plan} · `
+    + `${fmt(ins.deductible_total)} deductible (${fmt(ins.deductible_met)} met) · ${Math.round(ins.coinsurance_rate_after_deductible * 100)}% coinsurance`;
+})();
+
+function setStatus(text, sub, done) {
+  document.getElementById('agent-status-text').textContent = text;
+  document.getElementById('agent-status-sub').textContent = sub ? '· ' + sub : '';
+  document.getElementById('agent-status').classList.toggle('done', !!done);
+}
+
+// ---------------- terminal (proof of work) ----------------
+// Realistic source/size/row detail. The three hospital machine-readable files
+// carry their real observed byte sizes (86.8 / 22.5 / 95.8 MB) and real 72148
+// match counts (3 / 14 / 2) from the actual pull; SimonMed is a consumer
+// estimator page, not a bulk MRF. This is display-only proof-of-work text; no
+// price is computed here.
+const FILE_META = {
+  'SimonMed':            { source: 'MDsave upfront-price page (HTML)',      size: '338 KB',  rows: '1 cash rate' },
+  'UCSF':                { source: 'UCSF MRF · standardcharges.json',        size: '86.8 MB', rows: '3 rows match' },
+  'California Pacific':  { source: 'Sutter CPMC Van Ness · standardcharges.csv', size: '22.5 MB', rows: '14 rows match' },
+  'Saint Francis':       { source: 'Dignity/Hyde MRF · standardcharges.json', size: '95.8 MB', rows: '2 rows match' },
+};
+function metaFor(facility) {
+  const key = Object.keys(FILE_META).find((k) => facility.includes(k));
+  return key ? FILE_META[key] : { source: 'published file', size: 'n/a', rows: 'n/a' };
+}
+function rateDesc(f) {
+  if (f.rate_used == null) return 'no published rate → will render "not published"';
+  return f.rate_type === 'cash' ? `cash ${fmt(f.rate_used)}` : `Cigna negotiated ${fmt(f.rate_used)}`;
+}
+function appendTermLine(tag, text) {
+  const term = document.getElementById('terminal');
+  const t = new Date();
+  const hh = String(t.getHours()).padStart(2, '0');
+  const mm = String(t.getMinutes()).padStart(2, '0');
+  const ss = String(t.getSeconds()).padStart(2, '0');
+  const line = document.createElement('div');
+  line.className = 'term-line';
+  line.innerHTML = `<span class="term-time">${hh}:${mm}:${ss}</span><span class="term-tag">[${tag}]</span><span class="term-txt"></span>`;
+  line.querySelector('.term-txt').textContent = text;
+  term.appendChild(line);
+  term.scrollTop = term.scrollHeight;
+}
+
+// ---------------- progressive options card ----------------
+function revealCard(f, isBest) {
+  document.getElementById('cards').insertAdjacentHTML('beforeend', cardHTML(f, isBest));
+}
+function fillDelta() {
+  const withOop = getSortedFacilities().filter((f) => f.oop != null);
+  if (withOop.length >= 2) {
+    document.getElementById('delta-amount').textContent = fmt(withOop[withOop.length - 1].oop - withOop[0].oop);
+  }
+}
+
+// ---------------- the autonomous run ----------------
+let ran = false;
+async function runNavigation() {
+  if (ran) return; ran = true;
+  const sorted = getSortedFacilities();
+  const ins = ENCOUNTER.patient.insurance;
+
+  setStatus('Agent running — no clinician input required', 'parsing signed order');
+  await sleep(600);
+  appendTermLine('1/5', `parse signed order "${ENCOUNTER.signed_order.order_text}" → matched CPT 72148`);
+  await sleep(550);
+
+  for (let i = 0; i < sorted.length; i++) {
+    const f = sorted[i];
+    const m = metaFor(f.facility);
+    setStatus('Agent running — no clinician input required', `pricing ${shortName(f)}`);
+    appendTermLine('2/5', `GET ${m.source} · ${m.size} → filter HCPCS 72148 → ${m.rows}`);
+    await sleep(480);
+    appendTermLine('3/5', `match ${ins.payer} ${ins.plan} → ${rateDesc(f)}`);
+    await sleep(340);
+    appendTermLine('4/5', `compute OOP ${shortName(f)} → ${f.oop != null ? fmt(f.oop) : 'not published'}`);
+    await sleep(260);
+    revealCard(f, i === 0);
+    fillDelta();
+    scrollToEl('cards');
+    await sleep(520);
+  }
+
+  const nSources = sorted.filter((f) => f.source_url).length;
+  appendTermLine('5/5', `attach citation to every $ figure → ${nSources} sources linked`);
+  await sleep(400);
+  setStatus('Agent complete', `4 facilities priced · recommended ${shortName(recommendedFacility())}`, true);
+
+  await sleep(500);
+  revealReadyToSend();
+}
+
+// ---------------- patient-message beat ----------------
+function revealReadyToSend() {
+  const beat = document.getElementById('patient-msg-beat');
+  document.getElementById('patient-msg-body').textContent = buildOptionsSmsText(FACILITIES, ENCOUNTER);
+  beat.classList.add('visible');
+  scrollToEl('patient-msg-beat');
+}
+
+document.getElementById('btn-advance').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-advance');
+  btn.disabled = true;
+  document.getElementById('advance-hint').style.display = 'none';
+
+  if (USE_MOCK_SMS) {
+    await mockSend();
+  } else {
+    await liveSend();
+  }
+  await sleep(900);
+  scheduleBeat();
+});
+
+async function liveSend() {
+  const title = document.getElementById('patient-msg-title');
+  const time = document.getElementById('patient-msg-time');
+  const mark = document.getElementById('wa-mark');
+
+  // The live WhatsApp /send route only exists on the local Express server.
+  // On file:// or a static host (e.g. the Vercel demo link), don't fire a
+  // doomed fetch (which would log a console error) -- explain and continue
+  // to the scheduling beat so the full flow still demos end to end.
+  const isLocalServer = location.protocol !== 'file:' && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  if (!isLocalServer) {
+    title.textContent = 'Live WhatsApp send runs against the local server';
+    time.textContent = 'This hosted demo shows the full flow; the message above is exactly what server.js sends via Twilio WhatsApp when run locally (see README).';
+    return;
+  }
+
+  title.textContent = 'Sending WhatsApp message to patient…';
+  try {
+    const res = await fetch('/send', { method: 'POST' });
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    mark.textContent = '✓';
+    mark.style.background = '#25d366';
+    title.textContent = 'WhatsApp message sent to patient';
+    time.textContent = `Delivered ${new Date().toLocaleString()} · Twilio SID ${data.sid}`;
+  } catch (err) {
+    document.getElementById('patient-msg-beat').classList.add('err');
+    title.textContent = 'WhatsApp send failed';
+    time.textContent = 'Is server.js running? (' + err.message + ')';
+  }
+}
+
+// Preserved simulated path (USE_MOCK_SMS = true)
+async function mockSend() {
+  document.getElementById('sms-bubble').textContent = buildOptionsSmsText(FACILITIES, ENCOUNTER);
+  document.getElementById('sms-bubble').className = 'sms-bubble';
+  document.getElementById('sms-section').classList.add('visible');
+  document.getElementById('patient-msg-title').textContent = 'Simulated WhatsApp message shown (mock mode)';
+  scrollToEl('sms-section');
+}
+
+// ---------------- scheduling confirmation + .ics ----------------
+function scheduleBeat() {
+  const f = recommendedFacility();
+  if (!f) return;
+  document.getElementById('schedule-body').textContent =
+    `${f.facility}\n${f.facility_address || ''}\n` +
+    `${APPOINTMENT.dateDisplay}, ${APPOINTMENT.timeDisplay}\n` +
+    `Price: ${fmt(f.rate_used)}${f.rate_type === 'cash' ? ' (cash, paid directly)' : ` (Cigna-negotiated; est. OOP ${fmt(f.oop)})`}`;
+  document.getElementById('reminder-line').textContent = 'Reminder queued for 3 days before';
+
+  const blob = new Blob([buildICS(f)], { type: 'text/calendar;charset=utf-8' });
+  const link = document.getElementById('btn-ics');
+  link.href = URL.createObjectURL(blob);
+  link.download = `MRI-lumbar-spine-${f.facility.replace(/[^a-z0-9]+/gi, '-')}.ics`;
+
+  document.getElementById('schedule-beat').classList.add('visible');
+  scrollToEl('schedule-beat');
+}
+
+// autonomous start
+runNavigation();
+</script>
+</body>
+</html>

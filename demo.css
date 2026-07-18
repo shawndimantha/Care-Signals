@@ -1,0 +1,772 @@
+  /* =========================================================================
+     Care Signals — visual system
+     Warm cream page, white cards, near-black text, ONE red-orange accent
+     used sparingly. Ambient-clinical-doc visual language. 13px floor.
+     ========================================================================= */
+  :root {
+    --paper:      #f4efe9;   /* warm off-white page */
+    --card:       #ffffff;   /* pure white surfaces */
+    --ink:        #201d1a;   /* warm near-black */
+    --ink-2:      #453f39;   /* strong body */
+    --muted:      #635c54;   /* secondary text (>=5:1 on white) */
+    --faint:      #7a7168;   /* quietest supporting text (>=4.5:1) */
+    --line:       #ebe4dc;   /* warm hairline (used sparingly) */
+    --line-2:     #ddd4c9;   /* stronger divider */
+
+    /* the single accent — warm red-orange */
+    --accent:     #e5431e;   /* vivid: hero numbers, ring, indicators */
+    --accent-ink: #b0331a;   /* deeper: small text + button fills (contrast) */
+    --accent-deep:#8f2914;   /* hover */
+    --accent-050: #fdefe9;   /* peach tint bg */
+    --accent-100: #f7d7c9;   /* peach tint border */
+
+    --radius:     20px;
+    --radius-md:  16px;
+    --radius-sm:  12px;
+    --shadow-sm:  0 1px 2px rgba(74,50,28,.05);
+    --shadow:     0 1px 3px rgba(74,50,28,.05), 0 10px 30px rgba(74,50,28,.06);
+    --shadow-lift:0 2px 6px rgba(74,50,28,.07), 0 18px 44px rgba(74,50,28,.10);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 52px 20px 88px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1140px; margin: 0 auto; }
+
+  /* =========================================================================
+     NEW: two-column ambient-doc layout
+     LEFT = clinical note surface (hero) · RIGHT = assistant chat panel
+     ========================================================================= */
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 384px;
+    gap: 24px;
+    align-items: start;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 940px) { .layout { grid-template-columns: 1fr; } }
+  .note-surface { min-width: 0; }
+
+  /* collapsed transcript disclosure below the note */
+  .transcript-disclosure { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .transcript-disclosure > summary {
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+    list-style: none;
+    user-select: none;
+  }
+  .transcript-disclosure > summary::-webkit-details-marker { display: none; }
+  .transcript-disclosure > summary::before { content: "▸  "; }
+  .transcript-disclosure[open] > summary::before { content: "▾  "; }
+  .transcript-disclosure .transcript { margin-top: 16px; margin-bottom: 0; }
+  /* .transcript sets display:flex, which overrides the UA details-collapse --
+     re-hide it explicitly while the disclosure is closed. */
+  .transcript-disclosure:not([open]) .transcript { display: none; }
+
+  /* ---------- assistant chat panel (right) ---------- */
+  .assistant-panel {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    align-self: start;
+  }
+  .assistant-header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .assistant-header .ai-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--accent-050);
+    color: var(--accent);
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 15px;
+  }
+  .assistant-header .ai-title { font-weight: 700; font-size: 15px; color: var(--ink); line-height: 1.2; }
+  .assistant-header .ai-sub { font-size: 12px; color: var(--faint); margin-top: 1px; }
+  .assistant-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px;
+    overflow-y: auto;
+    min-height: 240px;
+    max-height: 460px;
+  }
+  .assistant-empty { font-size: 13.5px; color: var(--faint); line-height: 1.55; margin: auto 0; text-align: center; padding: 12px; }
+  .nav-msg {
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 10px 14px;
+    border-radius: 15px;
+    max-width: 94%;
+    white-space: pre-line;
+  }
+  .nav-msg.assistant { align-self: flex-start; background: #f1ebe3; color: var(--ink-2); border-bottom-left-radius: 5px; }
+  .nav-msg.user { align-self: flex-end; background: var(--accent-050); border: 1px solid var(--accent-100); color: var(--ink-2); border-bottom-right-radius: 5px; }
+
+  .assistant-composer { border-top: 1px solid var(--line); padding: 14px 16px; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .pill {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--card);
+    color: var(--ink-2);
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .pill::before { content: "○"; color: var(--faint); font-size: 12px; }
+  .pill:hover { background: #faf5f0; }
+  .pill:disabled { opacity: 0.5; cursor: default; }
+  .pill-primary { background: var(--accent-050); border-color: var(--accent-100); color: var(--accent-ink); }
+  .pill-primary::before { content: "◆"; color: var(--accent); }
+  .pill-primary:hover { background: var(--accent-100); }
+  .composer-input {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    border: 1px solid var(--line-2);
+    border-radius: 12px;
+    padding: 5px 5px 5px 14px;
+    background: var(--card);
+  }
+  .composer-input input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 14px;
+    background: transparent;
+    color: var(--ink);
+  }
+  .composer-send {
+    border: none;
+    background: var(--accent-ink);
+    color: #fff;
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 16px;
+    flex: none;
+  }
+  .composer-send:hover { background: var(--accent-deep); }
+
+  /* ---------- full-width flow output area ---------- */
+  .flow { margin-top: 4px; }
+  .flow-label {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+    margin: 0 0 12px;
+  }
+  #terminal-section { margin-bottom: 24px; }
+
+  /* ---------- terminal proof-of-work panel ---------- */
+  .terminal {
+    background: #16130f;
+    color: #ece4d6;
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    font-family: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, "Cascadia Code", "Roboto Mono", monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    min-height: 90px;
+  }
+  .term-line { white-space: pre-wrap; }
+  .term-time { color: #857b6c; margin-right: 12px; }
+  .term-tag { color: var(--accent); font-weight: 700; margin-right: 8px; }
+  .term-txt { color: #ece4d6; }
+  .term-cursor::after { content: "▋"; color: var(--accent); animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---------- page header ---------- */
+  h1 {
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .subtitle { color: var(--muted); font-size: 15px; margin: 0 0 30px; }
+
+  .disclaimer {
+    font-size: 13px;
+    color: var(--faint);
+    background: var(--card);
+    border-radius: 999px;
+    padding: 6px 14px;
+    margin-bottom: 20px;
+    display: inline-block;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ---------- shared panel shell (white card, soft shadow, no border) ---------- */
+  .panel {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 30px 32px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow);
+  }
+  .panel h2 {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--faint);
+  }
+  .panel h2:not(:first-child) { margin-top: 30px; padding-top: 26px; border-top: 1px solid var(--line); }
+
+  /* =========================================================================
+     STEP 2 — patient sidebar: a quiet context strip
+     ========================================================================= */
+  .patient-sidebar {
+    background: var(--card);
+    border-radius: var(--radius-md);
+    padding: 18px 26px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 44px;
+  }
+  .patient-sidebar .field { font-size: 14px; }
+  .patient-sidebar .field .k {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--faint);
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .patient-sidebar .field .v {
+    color: var(--ink-2);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.25;
+  }
+  .patient-sidebar .field.name .v { font-weight: 700; font-size: 16px; color: var(--ink); letter-spacing: -0.01em; }
+
+  /* =========================================================================
+     STEP 1 — encounter panel: a calm clinical-note surface
+     ========================================================================= */
+  .transcript { display: flex; flex-direction: column; gap: 9px; margin-bottom: 4px; }
+  .turn {
+    max-width: 82%;
+    padding: 11px 15px;
+    border-radius: 16px;
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
+  .turn .speaker {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--faint);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .turn.clinician { align-self: flex-start; background: #f1ebe3; color: var(--ink-2); border-bottom-left-radius: 5px; }
+  .turn.patient   { align-self: flex-end;   background: var(--card); color: var(--ink-2); box-shadow: var(--shadow-sm); border-bottom-right-radius: 5px; }
+  .turn.cost-worry {
+    background: var(--accent-050);
+    border: 1px solid var(--accent-100);
+    color: #7c2f14;
+    box-shadow: none;
+  }
+  .turn.cost-worry .speaker { color: var(--accent-ink); }
+
+  .note-block { margin-bottom: 16px; }
+  .note-block:last-of-type { margin-bottom: 0; }
+  .note-label {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--faint);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .note-text { font-size: 15px; line-height: 1.7; color: var(--ink-2); white-space: pre-line; }
+
+  .signed-order {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    background: #faf5f0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 13px 17px;
+    font-size: 14.5px;
+    color: var(--ink-2);
+    margin-top: 4px;
+  }
+  .signed-order .stamp {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #fff;
+    background: var(--ink);
+    border-radius: 6px;
+    padding: 3px 10px;
+    white-space: nowrap;
+  }
+
+  /* =========================================================================
+     Delta banner — a top hero of the price beat
+     ========================================================================= */
+  .delta-banner {
+    background: var(--card);
+    border-radius: var(--radius-md);
+    padding: 22px 28px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    box-shadow: var(--shadow);
+  }
+  .delta-banner .label {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 500;
+    max-width: 58%;
+  }
+  .delta-banner .amount {
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* =========================================================================
+     Facility cards — OOP figure is the hero, citations supporting detail
+     ========================================================================= */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius-md);
+    padding: 22px 24px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 22px;
+    row-gap: 2px;
+    position: relative;
+    box-shadow: var(--shadow);
+    transition: box-shadow .15s ease;
+  }
+  .card:hover { box-shadow: var(--shadow-lift); }
+  .card.best { box-shadow: 0 0 0 1.5px var(--accent), var(--shadow-lift); }
+  .rank-badge {
+    position: absolute;
+    top: -11px;
+    left: 20px;
+    background: var(--accent-ink);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 999px;
+    letter-spacing: 0.06em;
+    box-shadow: 0 3px 8px rgba(176,51,26,.30);
+  }
+  .facility-name {
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+    grid-column: 1 / 2;
+    align-self: baseline;
+  }
+  .facility-type { font-size: 13.5px; color: var(--muted); grid-column: 1 / 2; margin-top: 3px; }
+  .facility-distance { font-size: 13.5px; color: var(--muted); grid-column: 1 / 2; margin-top: 4px; }
+  .facility-distance .pin { margin-right: 4px; opacity: 0.9; }
+
+  .oop {
+    grid-column: 2 / 3;
+    grid-row: 1 / 4;
+    align-self: start;
+    text-align: right;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .oop .oop-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--faint);
+    text-align: right;
+    margin-bottom: 3px;
+  }
+  .card.best .oop { color: var(--accent); }
+
+  .row2 {
+    grid-column: 1 / 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 13.5px;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  .rate-info { color: var(--ink-2); font-size: 14px; }
+  .rate-info .badge {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 9px;
+    border-radius: 6px;
+    margin-right: 8px;
+    background: #f1ebe3;
+    color: var(--muted);
+    vertical-align: 1px;
+  }
+  .rate-info .badge.cash { background: #f1ebe3; color: var(--ink-2); }
+  .rate-info .badge.na   { background: var(--accent-050); color: var(--accent-ink); }
+
+  /* citations: quiet supporting detail, not accent-colored until hover */
+  .source-link { font-size: 13.5px; }
+  .source-link a {
+    color: var(--faint);
+    text-decoration: underline;
+    text-decoration-color: var(--line-2);
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+  }
+  .source-link a:hover { color: var(--accent-ink); text-decoration-color: var(--accent); }
+
+  .payer-label { grid-column: 1 / 3; font-size: 13.5px; color: var(--faint); margin-top: 8px; }
+
+  /* arithmetic: the math, supporting — quiet block, tabular */
+  .arithmetic {
+    grid-column: 1 / 3;
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.6;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .not-published { color: var(--accent-ink); font-weight: 700; }
+
+  footer {
+    margin-top: 34px;
+    font-size: 13px;
+    color: var(--faint);
+    text-align: center;
+    line-height: 1.7;
+  }
+  footer code { font-size: 13px; }
+
+  /* =========================================================================
+     Buttons — one accent, consistent
+     ========================================================================= */
+  .primary-btn, .secondary-btn, .confirm-btn, .ics-btn, .voice-btn {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .primary-btn {
+    display: inline-block;
+    background: var(--accent-ink);
+    color: #fff;
+    border: none;
+    padding: 13px 24px;
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(176,51,26,.22);
+  }
+  .primary-btn:hover { background: var(--accent-deep); }
+  .secondary-btn {
+    display: inline-block;
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--line-2);
+    padding: 12px 22px;
+    margin-top: 18px;
+    box-shadow: var(--shadow-sm);
+  }
+  .secondary-btn:hover { background: #faf5f0; }
+  .voice-btn {
+    display: inline-block;
+    background: #f1ebe3;
+    color: #a79f96;
+    border: none;
+    padding: 11px 20px;
+    margin-top: 16px;
+    cursor: not-allowed;
+  }
+
+  /* ---------- reveal transitions ---------- */
+  .reveal { display: none; }
+  .reveal.visible { display: block; animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* =========================================================================
+     STEP 3/BEAT 2 — mock SMS, styled as an iOS Messages thread
+     ========================================================================= */
+  .sms-section { margin-top: 24px; }
+  .sms-label { font-size: 13px; color: var(--faint); margin-bottom: 14px; text-align: center; }
+  .phone {
+    width: 330px;
+    margin: 0 auto;
+    background: #0b0b0d;
+    border-radius: 46px;
+    padding: 12px;
+    box-shadow: var(--shadow-lift), inset 0 0 0 2px #2a2a2f;
+    position: relative;
+  }
+  .phone-screen {
+    background: #ffffff;
+    border-radius: 34px;
+    padding: 40px 12px 22px;
+    min-height: 300px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+  }
+  /* iOS status bar: time left, battery right */
+  .phone-screen::before {
+    content: "9:41";
+    position: absolute;
+    top: 12px; left: 22px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0b0b0d;
+    letter-spacing: -0.01em;
+  }
+  .phone-screen::after {
+    content: "";
+    position: absolute;
+    top: 15px; right: 22px;
+    width: 22px; height: 11px;
+    border: 1.5px solid #0b0b0d;
+    border-radius: 3px;
+    background:
+      linear-gradient(#0b0b0d, #0b0b0d) left center / 70% 60% no-repeat;
+    background-origin: content-box;
+    padding: 1px;
+    box-shadow: 3px 0 0 -1px #0b0b0d;
+  }
+  /* notch */
+  .phone::before {
+    content: "";
+    position: absolute;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    width: 124px; height: 26px;
+    background: #0b0b0d;
+    border-radius: 0 0 16px 16px;
+    z-index: 3;
+  }
+  .phone-header {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding-bottom: 12px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #ececf0;
+  }
+  .phone-header::before {
+    content: "CT";
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: var(--accent-100);
+    color: var(--accent-ink);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    display: grid;
+    place-items: center;
+  }
+  .sms-bubble {
+    align-self: flex-start;
+    max-width: 86%;
+    background: #e9e9eb;
+    border-radius: 20px;
+    border-bottom-left-radius: 6px;
+    padding: 10px 15px;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: #0b0b0d;
+    white-space: pre-line;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: bubbleIn 0.4s ease forwards;
+    animation-delay: 0.15s;
+  }
+  @keyframes bubbleIn { to { opacity: 1; transform: translateY(0); } }
+  .sms-bubble.pending { color: #6b6b70; font-style: italic; }
+  .sms-bubble.confirmed { background: var(--accent-050); border: 1px solid var(--accent-100); border-bottom-left-radius: 6px; color: var(--ink); }
+
+  /* =========================================================================
+     STEP 4 — confirm + calendar artifact (app controls, below the phone)
+     ========================================================================= */
+  .confirm-btn {
+    display: block;
+    margin: 18px auto 0;
+    background: var(--accent-ink);
+    color: #fff;
+    border: none;
+    padding: 13px 24px;
+    box-shadow: 0 2px 8px rgba(176,51,26,.22);
+  }
+  .confirm-btn:hover { background: var(--accent-deep); }
+  .confirm-btn:disabled { background: #c9bfb4; box-shadow: none; cursor: wait; }
+  .stub-note { font-size: 13px; color: var(--faint); text-align: center; margin-top: 10px; line-height: 1.55; }
+  .reminder-line { text-align: center; font-size: 14px; color: var(--accent-ink); font-weight: 600; margin-top: 16px; }
+  .ics-btn {
+    display: block;
+    margin: 12px auto 0;
+    background: var(--card);
+    color: var(--accent-ink);
+    border: 1px solid var(--accent-100);
+    padding: 11px 20px;
+    text-decoration: none;
+    text-align: center;
+    width: fit-content;
+  }
+  .ics-btn:hover { background: var(--accent-050); }
+
+  /* ---------- new: live-SMS send status (Twilio, via server.js) ---------- */
+  .live-status { display: inline-block; font-size: 13px; color: var(--faint); margin-left: 12px; vertical-align: middle; }
+  .live-status.ok { color: var(--accent-ink); font-weight: 600; }
+  .live-status.err { color: #b42318; font-weight: 600; }
+
+  /* =========================================================================
+     Two-page flow additions (encounter.html + navigation.html)
+     ========================================================================= */
+
+  /* page 2 layout: terminal LEFT, options+beats RIGHT */
+  .nav-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); }
+  @media (max-width: 940px) { .nav-layout { grid-template-columns: 1fr; } }
+  .nav-left { min-width: 0; position: sticky; top: 20px; align-self: start; }
+  @media (max-width: 940px) { .nav-left { position: static; } }
+  .nav-right { min-width: 0; }
+
+  /* agent status header above the terminal */
+  .agent-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink-2);
+    margin: 0 0 12px;
+  }
+  .agent-status .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 rgba(229,67,30,.5);
+    animation: pulse 1.4s ease-out infinite;
+    flex: none;
+  }
+  .agent-status.done .dot { background: #3f9d6b; animation: none; box-shadow: none; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(229,67,30,.45); }
+    70% { box-shadow: 0 0 0 8px rgba(229,67,30,0); }
+    100% { box-shadow: 0 0 0 0 rgba(229,67,30,0); }
+  }
+  .agent-status .sub { color: var(--faint); font-weight: 500; }
+
+  /* the single presenter-controlled advance button */
+  .advance-btn {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    background: var(--accent-ink);
+    color: #fff;
+    border: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 15px 22px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(176,51,26,.25);
+    transition: background .15s ease;
+  }
+  .advance-btn:hover { background: var(--accent-deep); }
+  .advance-btn:disabled { background: #c9bfb4; box-shadow: none; cursor: default; }
+  .advance-hint { text-align: center; font-size: 12.5px; color: var(--faint); margin-top: 8px; }
+
+  /* live WhatsApp send confirmation + scheduling card (page 2, live path) */
+  .beat-card {
+    background: var(--card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    margin-top: 18px;
+  }
+  .beat-card .beat-head {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 14px; font-weight: 700; color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .beat-card .wa-mark {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #25d366; color: #fff; font-size: 13px; font-weight: 800;
+    display: grid; place-items: center; flex: none;
+  }
+  .beat-card .beat-body { font-size: 13.5px; line-height: 1.55; color: var(--ink-2); white-space: pre-line; }
+  .beat-card .beat-time { font-size: 12.5px; color: var(--faint); margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .beat-card.err .beat-head { color: #b42318; }
+  .beat-card.err .wa-mark { background: #b42318; }

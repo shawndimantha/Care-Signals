@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Care Signals — Clinical Surface</title>
+<link rel="icon" href="data:,"><!-- suppress the /favicon.ico 404 -->
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<div class="wrap">
+  <span class="disclaimer">Synthetic demo data — fictional patient, no real PHI.</span>
+  <h1>MRI Lumbar Spine, No Contrast — CPT 72148</h1>
+  <p class="subtitle" id="subtitle">San Francisco, CA · Patient plan: Cigna PPO · $3,000 deductible ($0 met) · 20% coinsurance after deductible</p>
+
+  <div class="layout">
+    <!-- ===================== LEFT: clinical note surface (hero) ===================== -->
+    <main class="note-surface">
+      <div class="patient-sidebar" id="patient-sidebar"></div>
+
+      <div class="panel" id="note-panel">
+        <h2>Clinical Note</h2>
+        <div class="note-block">
+          <div class="note-label">HPI</div>
+          <div class="note-text" id="note-hpi"></div>
+        </div>
+        <div class="note-block">
+          <div class="note-label">Assessment &amp; Plan</div>
+          <div class="note-text" id="note-ap"></div>
+        </div>
+
+        <h2>Signed Order</h2>
+        <div class="signed-order" id="signed-order"></div>
+
+        <details class="transcript-disclosure">
+          <summary>View ambient transcript</summary>
+          <div class="transcript" id="transcript"></div>
+        </details>
+      </div>
+    </main>
+
+    <!-- ===================== RIGHT: assistant sidebar ===================== -->
+    <aside class="assistant-panel">
+      <div class="assistant-header">
+        <div class="ai-avatar">✦</div>
+        <div>
+          <div class="ai-title">Care Navigator</div>
+          <div class="ai-sub">Current encounter · CPT 72148</div>
+        </div>
+      </div>
+      <div class="assistant-messages" id="assistant-messages">
+        <div class="assistant-empty" id="assistant-empty">Suggested actions for this signed order are below. Start with “Run care navigation on this order.”</div>
+      </div>
+      <div class="assistant-composer">
+        <div class="pill-row" id="pill-row">
+          <button class="pill pill-primary" id="pill-run" type="button">Run care navigation on this order</button>
+          <button class="pill" type="button" data-q="What's the cheapest option?">Cheapest option?</button>
+          <button class="pill" type="button" data-q="Why is Saint Francis so expensive?">Why so expensive?</button>
+        </div>
+        <div class="composer-input">
+          <input type="text" id="assistant-input" placeholder="Ask the care navigator…" autocomplete="off" />
+          <button class="composer-send" id="assistant-send" type="button" aria-label="Send">↑</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    Prices sourced from published hospital machine-readable files and MDsave live pricing pages. See <code>data_card.md</code> for full provenance and schema notes. Not medical or financial advice.
+  </footer>
+</div>
+
+<script src="agent_output.js"></script>
+<script src="encounter_output.js"></script>
+<script src="sms-text.js"></script>
+<script src="demo.js"></script>
+<script>
+// ---------------- render the clinical note surface ----------------
+function renderPatientSidebar() {
+  const p = ENCOUNTER.patient;
+  const ins = p.insurance;
+  const deductibleMet = fmt(ins.deductible_met);
+  const deductibleTotal = fmt(ins.deductible_total);
+  const addr = p.address ? `${p.address.street}, ${p.address.city}, ${p.address.state} ${p.address.zip}` : 'not on file';
+
+  document.getElementById('subtitle').textContent =
+    `San Francisco, CA · Patient plan: ${ins.payer} ${ins.plan} · ${deductibleTotal} deductible (${deductibleMet} met) · `
+    + `${Math.round(ins.coinsurance_rate_after_deductible * 100)}% coinsurance after deductible`;
+
+  const field = (k, v) => `<div class="field"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+  document.getElementById('patient-sidebar').innerHTML =
+    `<div class="field name"><span class="k">Patient</span><span class="v">${p.name}</span></div>` +
+    field('Age / Sex', `${p.age}${p.sex}`) +
+    field('MRN', p.mrn) +
+    field('Address', addr) +
+    field('Phone', p.phone || 'not on file') +
+    field('Plan', `${ins.payer} ${ins.plan}`) +
+    field('Deductible', `${deductibleMet} of ${deductibleTotal} met`);
+}
+
+function renderClinicalNote() {
+  document.getElementById('note-hpi').textContent = ENCOUNTER.clinical_note.hpi;
+  document.getElementById('note-ap').textContent = ENCOUNTER.clinical_note.assessment_and_plan;
+}
+function renderSignedOrder() {
+  document.getElementById('signed-order').innerHTML =
+    `<span class="stamp">Signed</span>` +
+    `<span>${ENCOUNTER.signed_order.order_text} — signed by ${clinicianFullName()}, ${signedDateTimeDisplay()}</span>`;
+}
+function renderTranscript() {
+  const el = document.getElementById('transcript');
+  el.innerHTML = ENCOUNTER.ambient_transcript.map((line) => {
+    const isPatient = /^PATIENT:/i.test(line);
+    const speaker = isPatient ? 'Patient' : 'Clinician';
+    const text = line.replace(/^(PATIENT|CLINICIAN):\s*/i, '');
+    const isCostLine = /worried|worry|cost/i.test(text);
+    return `<div class="turn ${isPatient ? 'patient' : 'clinician'} ${isCostLine ? 'cost-worry' : ''}"><span class="speaker">${speaker}</span>${text}</div>`;
+  }).join('');
+}
+
+// ---------------- assistant chat ----------------
+function clearNavEmpty() {
+  const empty = document.getElementById('assistant-empty');
+  if (empty) empty.remove();
+}
+function addNavMsg(role, text) {
+  clearNavEmpty();
+  const wrap = document.getElementById('assistant-messages');
+  const el = document.createElement('div');
+  el.className = 'nav-msg ' + role;
+  el.textContent = text;
+  wrap.appendChild(el);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+// PRIMARY pill: navigate to page 2, which auto-starts the run. No further
+// physician input required -- that is the point.
+document.getElementById('pill-run').addEventListener('click', () => {
+  window.location.href = 'navigation.html?run=1';
+});
+
+// secondary pills + free-text: grounded answers, no navigation
+document.querySelectorAll('.pill[data-q]').forEach((pill) => {
+  pill.addEventListener('click', () => {
+    const q = pill.getAttribute('data-q');
+    addNavMsg('user', q);
+    addNavMsg('assistant', navigatorReply(q));
+  });
+});
+function submitAssistantInput() {
+  const input = document.getElementById('assistant-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addNavMsg('user', text);
+  addNavMsg('assistant', navigatorReply(text));
+}
+document.getElementById('assistant-send').addEventListener('click', submitAssistantInput);
+document.getElementById('assistant-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); submitAssistantInput(); }
+});
+
+renderPatientSidebar();
+renderClinicalNote();
+renderSignedOrder();
+renderTranscript();
+</script>
+</body>
+</html>

@@ -2,3 +2,8 @@
 .DS_Store
 node_modules/
 .env
+
+# reference screenshots (not for redistribution)
+Abridge UI.png
+Abridge UI.avif
+*.avif
