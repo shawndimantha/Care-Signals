@@ -7,3 +7,7 @@ node_modules/
 Abridge UI.png
 Abridge UI.avif
 *.avif
+.vercel
+
+# scratch static deploy bundle
+care-signals-demo/
